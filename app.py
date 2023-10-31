@@ -2,7 +2,7 @@ import socket
 import qrcode
 import threading
 from yt_dlp import YoutubeDL
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
@@ -12,12 +12,21 @@ app = Flask(__name__)
 def index():
     if request.method == 'POST':
         if request.form['player_control'] == 'restart':
-            pass # do something
+            v = driver.execute_script("""const video = document.getElementById('video');
+                        video.currentTime = 0;""")
+            return redirect('/')
         elif request.form['player_control'] == 'pause':
-            v = driver.find_element(By.ID, 'video')
-
+            v = driver.execute_script("""const video = document.getElementById('video');
+                                    if (!video.paused) {
+                                        video.pause();
+                                    } else {
+                                        video.play();
+                                    }""")
+            return redirect('/')
         elif request.form['player_control'] == 'skip':
-            pass # do something else
+            v = driver.execute_script("""const video = document.getElementById('video');
+                        video.currentTime = video.duration;""")
+            return redirect('/')
     elif request.method == 'GET':
         return render_template("mobile_index.html", active="home")
 
@@ -58,20 +67,13 @@ def play_video():
 
     return render_template("video_player.html")
 
-def run_flask():
-    app.run(host="0.0.0.0", port=8080)
-
 def run_selenium():
-    # Start Selenium WebDriver after Flask server has started
     global driver
     driver = webdriver.Firefox()
     driver.get('http://127.0.0.1:8080/tv')
 
-
 if __name__ == "__main__":
-    # Start Flask in the main thread
-    flask_server = threading.Thread(target=run_flask)
-    flask_server.start()
+    selenium_thread = threading.Thread(target=run_selenium)
+    selenium_thread.start()
 
-    frontend = threading.Thread(target=run_selenium)
-    frontend.start()
+    app.run(host="0.0.0.0", port=8080)
