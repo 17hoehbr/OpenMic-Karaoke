@@ -1,9 +1,10 @@
 import socket
 import qrcode
-import os
-import webview
+import threading
 from yt_dlp import YoutubeDL
 from flask import Flask, render_template, request
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 
 app = Flask(__name__)
 
@@ -13,7 +14,8 @@ def index():
         if request.form['player_control'] == 'restart':
             pass # do something
         elif request.form['player_control'] == 'pause':
-            pass # do something else
+            v = driver.find_element(By.ID, 'video')
+
         elif request.form['player_control'] == 'skip':
             pass # do something else
     elif request.method == 'GET':
@@ -51,15 +53,25 @@ def play_video():
         'format': "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
     }
 
-    if os.path.isfile(output):
-        os.remove(output)
-
     with YoutubeDL(ydl_opts) as ydl:
-        ydl.download([f'ytsearch: {song} karaoke'])
+        ydl.download([f'ytsearch:{song} karaoke'])
 
     return render_template("video_player.html")
 
+def run_flask():
+    app.run(host="0.0.0.0", port=8080)
+
+def run_selenium():
+    # Start Selenium WebDriver after Flask server has started
+    global driver
+    driver = webdriver.Firefox()
+    driver.get('http://127.0.0.1:8080/tv')
+
+
 if __name__ == "__main__":
-    webview.create_window('Karaoke', 'http://127.0.0.1:8080/tv')
-    webview.start()
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    # Start Flask in the main thread
+    flask_server = threading.Thread(target=run_flask)
+    flask_server.start()
+
+    frontend = threading.Thread(target=run_selenium)
+    frontend.start()
