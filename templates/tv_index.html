@@ -1,0 +1,31 @@
+{% extends 'tv_base.html' %}
+
+{% block head %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+    #server-ip {
+        font-size: 24px;
+        margin-top: 20px;
+    }
+    #qr-code {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Welcome to the TV Interface</h1>
+
+<div id="server-ip">
+    <p>Server's Local IP Address:</p>
+    <p>http://{{ local_ip }}</p>
+</div>
+
+<div id="qr-code">
+    <p>Scan QR Code to Access</p>
+    <img id="qr-image" src="/static/qrcode.png" alt="fuck">
+</div>
+{% endblock %}

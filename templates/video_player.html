@@ -1,0 +1,19 @@
+{% extends 'tv_base.html' %}
+{% block head %}
+  <style>
+  video{
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <video autoplay>
+      <source src="/static/video.mp4">
+  </video>
+{% endblock %}
