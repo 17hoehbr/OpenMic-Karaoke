@@ -1,7 +1,7 @@
 {% extends 'tv_base.html' %}
 {% block head %}
   <style>
-  video{
+    video{
       width: 100vw;
       height: 100vh;
       object-fit: cover;
@@ -13,7 +13,15 @@
 {% endblock %}
 
 {% block content %}
+
   <video id="video" autoplay>
       <source src="/static/video.mp4">
   </video>
+
+  <script type="text/javascript">
+    var video = document.getElementById('video');
+    video.addEventListener('ended',function(){
+        location.href = 'http://127.0.0.1:8080/tv';
+    });
+  </script>
 {% endblock %}

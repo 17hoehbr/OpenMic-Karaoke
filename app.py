@@ -1,12 +1,18 @@
 import socket
 import qrcode
 import threading
+import os
 from yt_dlp import YoutubeDL
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
 
 app = Flask(__name__)
+
+app.secret_key = os.urandom(12).hex()
+
+download_lock = threading.Lock()
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -34,9 +40,16 @@ def index():
 def queue():
     return render_template("queue.html", active="queue")
 
-@app.route("/search")
+@app.route("/search", methods=['GET', 'POST'])
 def search():
-    return render_template("search.html", active="search")
+    if request.method == 'POST':
+        song = request.form['song']
+        download_thread = threading.Thread(target=download_video, args=(song,))
+        download_thread.start()
+        flash("Song added to queue")
+        return redirect('/')
+    elif request.method == 'GET':
+        return render_template("search.html", active="search")
 
 
 @app.route("/tv")
@@ -53,24 +66,33 @@ def tv():
 
 @app.route('/play_video')
 def play_video():
-    song = "under pressure"
-
-    output = './static/video.mp4'
-
-    ydl_opts = {
-        'outtmpl': output,  # Set the output filename and path
-        'format': "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
-    }
-
-    with YoutubeDL(ydl_opts) as ydl:
-        ydl.download([f'ytsearch:{song} karaoke'])
-
     return render_template("video_player.html")
 
 def run_selenium():
     global driver
-    driver = webdriver.Firefox()
+    firefox_options = Options()
+    firefox_options.set_preference("media.autoplay.default", 0)
+    driver = webdriver.Firefox(options=firefox_options)
+
     driver.get('http://127.0.0.1:8080/tv')
+    driver.fullscreen_window()
+
+def download_video(song):
+    output = './static/video.mp4'
+
+    with download_lock:
+        if os.path.isfile(output):
+            os.remove(output)
+
+        ydl_opts = {
+            'outtmpl': output,
+            'format': "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+        }
+
+        with YoutubeDL(ydl_opts) as ydl:
+            ydl.download([f'ytsearch:{song} karaoke'])
+
+    driver.get('http://127.0.0.1:8080/play_video')
 
 if __name__ == "__main__":
     selenium_thread = threading.Thread(target=run_selenium)

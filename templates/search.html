@@ -1,5 +1,13 @@
 {% extends 'mobile_base.html' %}
 
 {% block content %}
-
+<div class="container">
+  <form method="post">
+    <div class="mb-3 mt-3">
+      <label for="song" class="form-label">Song:</label>
+      <input type="text" class="form-control" id="song" name="song">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form> 
+</div>
 {% endblock %}
