@@ -1,13 +1,35 @@
 {% extends 'mobile_base.html' %}
 
 {% block content %}
-<div class="container">
+<div class="container my-3">
   <form method="post">
-    <div class="mb-3 mt-3">
+    <div>
       <label for="song" class="form-label">Song:</label>
       <input type="text" class="form-control" id="song" name="song">
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
   </form> 
 </div>
+
+{% if result %}
+{% for r in result['entries'] %}
+<div class="container my-3">
+  <div class="card" style="max-width: 540px;">
+    <div class="row g-0">
+      <div class="col-md-4">
+        <img src="{{ r['thumbnails'][0]['url'] }}" class="img-fluid rounded-start" alt="video thumbnail">
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h5 class="card-title">{{ r['title'] }}</h5>
+          <p class="card-text">{{ r['channel'] }}</p>
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Add to queue</button>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
 {% endblock %}

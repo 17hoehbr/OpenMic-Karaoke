@@ -13,8 +13,6 @@ app = Flask(__name__)
 app.secret_key = os.urandom(12).hex()
 auth = HTTPDigestAuth()
 
-download_lock = threading.Lock()
-
 users = {
     "bryce": "bryce"
 }
@@ -27,10 +25,48 @@ def get_pw(username):
         return users.get(username)
     return None
 
-# Mobile Routes
-@app.route("/", methods=['GET', 'POST'])
+# ---------------- Mobile Routes ----------------
+
+@app.route("/")
 def index():
+    return render_template("mobile_index.html", active="home")
+
+@app.route("/queue")
+def queue():
+    return render_template("queue.html", active="queue")
+
+@app.route("/search", methods=['GET', 'POST'])
+def search():
     if request.method == 'POST':
+        song = request.form['song']
+        
+        #download_thread = threading.Thread(target=download_video, args=(song,))
+        #download_thread.start()
+
+        num_results = 5
+        yt_search = f'ytsearch{num_results}:"{song} karaoke"'
+
+        ydl_opts = {
+            'format': 'best',   # You can specify the format you want
+            'extract_flat': True,
+            'extract_no_playlists': True
+        }
+
+        with YoutubeDL(ydl_opts) as ydl:
+            result = ydl.extract_info(f'{yt_search}', download=False)
+
+        for r in result['entries']:
+            print(r)
+
+        return render_template("search.html", active="search", result=result)
+    else:
+        return render_template("search.html", active="search")
+
+@app.route("/admin", methods=['GET', 'POST'])
+@auth.login_required
+def admin():
+    if request.method == 'POST':
+        # Playback controls
         if request.form['player_control'] == 'restart':
             v = driver.execute_script("""const video = document.getElementById('video');
                         video.currentTime = 0;""")
@@ -47,30 +83,11 @@ def index():
             v = driver.execute_script("""const video = document.getElementById('video');
                         video.currentTime = video.duration;""")
             return redirect('/')
-    elif request.method == 'GET':
-        return render_template("mobile_index.html", active="home")
+    else:
+        return render_template("admin.html", active="admin")
 
-@app.route("/queue")
-def queue():
-    return render_template("queue.html", active="queue")
+# ---------------- TV Routes ----------------
 
-@app.route("/search", methods=['GET', 'POST'])
-def search():
-    if request.method == 'POST':
-        song = request.form['song']
-        download_thread = threading.Thread(target=download_video, args=(song,))
-        download_thread.start()
-        flash("Song added to queue")
-        return redirect('/')
-    elif request.method == 'GET':
-        return render_template("search.html", active="search")
-
-@app.route("/admin")
-@auth.login_required
-def admin():
-    return render_template("admin.html", active="admin")
-
-# TV Routes
 @app.route("/tv")
 def tv():
     # get local ip address
@@ -87,6 +104,8 @@ def tv():
 def play_video():
     return render_template("video_player.html")
 
+# ---------------- Functions ----------------
+
 def run_selenium():
     global driver
     firefox_options = Options()
@@ -99,17 +118,13 @@ def run_selenium():
 def download_video(song):
     output = './static/video.mp4'
 
-    with download_lock:
-        if os.path.isfile(output):
-            os.remove(output)
+    ydl_opts = {
+        'outtmpl': output,
+        'format': "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+    }
 
-        ydl_opts = {
-            'outtmpl': output,
-            'format': "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
-        }
-
-        with YoutubeDL(ydl_opts) as ydl:
-            ydl.download([f'ytsearch:{song} karaoke'])
+    with YoutubeDL(ydl_opts) as ydl:
+        ydl.download([f'ytsearch:{song} karaoke'])
 
     driver.get('http://127.0.0.1:8080/play_video')
 
