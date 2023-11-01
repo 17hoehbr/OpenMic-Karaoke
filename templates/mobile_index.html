@@ -1,34 +1,9 @@
 {% extends 'mobile_base.html' %}
 
 {% block head %}
-<style>
-.container img {
-    width: 100%;
- }
 
-p {
-    color:#f2b70d;
-}
-
-hr {
-    color: black;
-    border-width: 2px;
-}
-
-#bg {
-    background-color: #333c3d;
-    border-radius: 5px;
-}
-
-form {
-    background-color: #121212;
-    border-radius: 10px;
-}
-</style>
 {% endblock %}
 {% block content %}
-
-<div id="bg" class="container p-3 m-2 w-auto">
   <div >
     <h1>Now Playing</h1>
     <p>Test</p>
@@ -38,21 +13,5 @@ form {
     <h1>Next Song</h1>
     <p>Test</p>
   </div>
-  <hr>
-  <div>
-    <h1>Player Control</h1>
-    <form method="post" class="btn-group d-flex m-3 justify-content-center">
-        <button type="submit" name="player_control" value="restart" class="btn">
-            <img src="./static/icons/rewind.png" alt="Restart">
-        </button>
-        <button type="submit" name="player_control" value="pause" class="btn">
-            <img src="./static/icons/pause-button.png" alt="Pause">
-        </button>
-        <button type="submit" name="player_control" value="skip" class="btn">
-            <img src="./static/icons/fast-forward.png" alt="Skip">
-        </button>
-    </form>
-  </div>
-</div>
 {% endblock %}
 

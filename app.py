@@ -4,16 +4,30 @@ import threading
 import os
 from yt_dlp import YoutubeDL
 from flask import Flask, render_template, request, redirect, flash
+from flask_httpauth import HTTPDigestAuth
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 
 app = Flask(__name__)
-
 app.secret_key = os.urandom(12).hex()
+auth = HTTPDigestAuth()
 
 download_lock = threading.Lock()
 
+users = {
+    "bryce": "bryce"
+}
+
+queue = []
+
+@auth.get_password
+def get_pw(username):
+    if username in users:
+        return users.get(username)
+    return None
+
+# Mobile Routes
 @app.route("/", methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -51,7 +65,12 @@ def search():
     elif request.method == 'GET':
         return render_template("search.html", active="search")
 
+@app.route("/admin")
+@auth.login_required
+def admin():
+    return render_template("admin.html", active="admin")
 
+# TV Routes
 @app.route("/tv")
 def tv():
     # get local ip address
