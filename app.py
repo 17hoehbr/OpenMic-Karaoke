@@ -55,9 +55,6 @@ def search():
         with YoutubeDL(ydl_opts) as ydl:
             result = ydl.extract_info(f'{yt_search}', download=False)
 
-        for r in result['entries']:
-            print(r)
-
         return render_template("search.html", active="search", result=result)
     else:
         return render_template("search.html", active="search")
