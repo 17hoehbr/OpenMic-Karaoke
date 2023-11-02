@@ -13,15 +13,37 @@
 {% endblock %}
 
 {% block content %}
+  <script>
+    const socket = io("{{ url_for('index') }}");
 
+    socket.on('player_restart', function() {
+      const video = document.getElementById('video');
+      video.currentTime = 0;
+    });
+
+    socket.on('player_pause', function() {
+      const video = document.getElementById('video');
+      if (!video.paused) {
+          video.pause();
+      } else {
+          video.play();
+      }
+    });
+
+    socket.on('player_skip', function() {
+      const video = document.getElementById('video');
+      video.currentTime = video.duration;
+    });
+  </script>
+  
   <video id="video" autoplay>
       <source src="/static/video.mp4">
   </video>
 
   <script type="text/javascript">
-    var video = document.getElementById('video');
+    const video = document.getElementById('video');
     video.addEventListener('ended',function(){
-        location.href = 'http://127.0.0.1:8080/tv';
+        location.href = "{{ url_for('tv') }}";
     });
   </script>
 {% endblock %}

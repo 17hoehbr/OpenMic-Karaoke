@@ -1,15 +1,15 @@
 import socket
 import qrcode
-import threading
 import os
+import threading
 from yt_dlp import YoutubeDL
-from flask import Flask, render_template, request, redirect, flash
+from flask import Flask, render_template, request, redirect, flash, url_for
 from flask_httpauth import HTTPDigestAuth
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
+socketio = SocketIO(app)
+
 app.secret_key = os.urandom(12).hex()
 auth = HTTPDigestAuth()
 
@@ -37,51 +37,49 @@ def queue():
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
+    result = ''
     if request.method == 'POST':
-        song = request.form['song']
-        
-        #download_thread = threading.Thread(target=download_video, args=(song,))
-        #download_thread.start()
+        if 'song' in request.form:
+            song = request.form['song']
+            
+            #download_thread = threading.Thread(target=download_video, args=(song,))
+            #download_thread.start()
 
-        num_results = 5
-        yt_search = f'ytsearch{num_results}:"{song} karaoke"'
+            num_results = 5
+            yt_search = f'ytsearch{num_results}:"{song} karaoke"'
 
-        ydl_opts = {
-            'format': 'best',   # You can specify the format you want
-            'extract_flat': True,
-            'extract_no_playlists': True
-        }
+            ydl_opts = {
+                'format': 'best',   # You can specify the format you want
+                'extract_flat': True,
+                'extract_no_playlists': True
+            }
 
-        with YoutubeDL(ydl_opts) as ydl:
-            result = ydl.extract_info(f'{yt_search}', download=False)
+            with YoutubeDL(ydl_opts) as ydl:
+                result = ydl.extract_info(f'{yt_search}', download=False)
+            
+        elif 'url' in request.form:
+            url = request.form['url']
+            
+            download_thread = threading.Thread(target=download_video, args=(url,))
+            download_thread.start()
 
-        return render_template("search.html", active="search", result=result)
-    else:
-        return render_template("search.html", active="search")
+    return render_template("search.html", active="search", result=result)
+
 
 @app.route("/admin", methods=['GET', 'POST'])
-@auth.login_required
+#@auth.login_required
 def admin():
     if request.method == 'POST':
-        # Playback controls
-        if request.form['player_control'] == 'restart':
-            v = driver.execute_script("""const video = document.getElementById('video');
-                        video.currentTime = 0;""")
-            return redirect('/')
-        elif request.form['player_control'] == 'pause':
-            v = driver.execute_script("""const video = document.getElementById('video');
-                                    if (!video.paused) {
-                                        video.pause();
-                                    } else {
-                                        video.play();
-                                    }""")
-            return redirect('/')
-        elif request.form['player_control'] == 'skip':
-            v = driver.execute_script("""const video = document.getElementById('video');
-                        video.currentTime = video.duration;""")
-            return redirect('/')
-    else:
-        return render_template("admin.html", active="admin")
+        if 'restart' in request.form:
+            # Execute your JavaScript code to restart playback
+            socketio.emit('player_restart')
+        elif 'pause' in request.form:
+            # Execute your JavaScript code to pause/resume playback
+            socketio.emit('player_pause')
+        elif 'skip' in request.form:
+            # Execute your JavaScript code to skip playback
+            socketio.emit('player_skip')
+    return render_template("admin.html", active="admin")
 
 # ---------------- TV Routes ----------------
 
@@ -93,7 +91,7 @@ def tv():
 
     local_ip = s.getsockname()[0]
     qr = qrcode.make(local_ip)
-    qr.save("./qrcode.png")
+    qr.save("./static/qrcode.png")
 
     return render_template("tv_index.html", local_ip=local_ip)
 
@@ -103,14 +101,6 @@ def play_video():
 
 # ---------------- Functions ----------------
 
-def run_selenium():
-    global driver
-    firefox_options = Options()
-    firefox_options.set_preference("media.autoplay.default", 0)
-    driver = webdriver.Firefox(options=firefox_options)
-
-    driver.get('http://127.0.0.1:8080/tv')
-    driver.fullscreen_window()
 
 def download_video(song):
     output = './static/video.mp4'
@@ -123,10 +113,5 @@ def download_video(song):
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([f'ytsearch:{song} karaoke'])
 
-    driver.get('http://127.0.0.1:8080/play_video')
-
 if __name__ == "__main__":
-    selenium_thread = threading.Thread(target=run_selenium)
-    selenium_thread.start()
-
-    app.run(host="0.0.0.0", port=8080)
+    socketio.run(app, host="0.0.0.0", port=8080)

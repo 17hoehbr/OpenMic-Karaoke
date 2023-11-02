@@ -26,7 +26,9 @@
         </div>
       </div>
     </div>
-    <button type="submit" class="btn btn-primary">Add to queue</button>
+    <form method="post">
+      <button type="submit" name='url' value="{{ r['url'] }}" class="btn btn-primary">Add to queue</button>
+    </form>
   </div>
 </div>
 {% endfor %}
