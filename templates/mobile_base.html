@@ -29,6 +29,12 @@
             background-color: #121212;
             border-radius: 10px;
         }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
     </style>
     {% block head %}
     {% endblock %}
@@ -52,7 +58,7 @@
         </ul>
       </div>
     </nav>
-    <div id="bg" class="container p-3 m-2 w-auto">
+    <div id="bg" class="container-fluid p-3 m-2 w-auto">
         {% block content %}
         {% endblock %}
     </div>

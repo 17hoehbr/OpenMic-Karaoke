@@ -15,14 +15,13 @@
 {% block content %}
   <script>
     const socket = io("{{ url_for('index') }}");
+    const video = document.getElementById('video');
 
     socket.on('player_restart', function() {
-      const video = document.getElementById('video');
       video.currentTime = 0;
     });
 
     socket.on('player_pause', function() {
-      const video = document.getElementById('video');
       if (!video.paused) {
           video.pause();
       } else {
@@ -31,19 +30,15 @@
     });
 
     socket.on('player_skip', function() {
-      const video = document.getElementById('video');
       video.currentTime = video.duration;
     });
-  </script>
-  
-  <video id="video" autoplay>
-      <source src="/static/video.mp4">
-  </video>
 
-  <script type="text/javascript">
-    const video = document.getElementById('video');
     video.addEventListener('ended',function(){
         location.href = "{{ url_for('tv') }}";
     });
   </script>
+  
+  <video id="video" autoplay>
+      <source src="./songs/{{ song_queue[0] }}" type="video/mp4">
+  </video>
 {% endblock %}

@@ -28,4 +28,12 @@
     <p>Scan QR Code to Access</p>
     <img id="qr-image" src="/static/qrcode.png" alt="fuck">
 </div>
+
+<script>
+    const socket = io("{{ url_for('index') }}");
+    socket.on('play_video', function() {
+        window.location.replace("{{ url_for('play_video' )}}");
+    });
+</script>
+
 {% endblock %}

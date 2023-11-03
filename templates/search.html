@@ -1,7 +1,7 @@
 {% extends 'mobile_base.html' %}
 
 {% block content %}
-<div class="container my-3">
+<div class="container-fluid my-3">
   <form method="post">
     <div>
       <label for="song" class="form-label">Song:</label>
@@ -12,26 +12,22 @@
 </div>
 
 {% if result %}
+<div class="container-fluid">
+  <div class="row">
 {% for r in result['entries'] %}
-<div class="container my-3">
-  <div class="card" style="max-width: 540px;">
-    <div class="row g-0">
-      <div class="col-md-4">
-        <img src="{{ r['thumbnails'][0]['url'] }}" class="img-fluid rounded-start" alt="video thumbnail">
+    <div class="col-lg card my-3 mx-auto text-center" style="width:400px">
+      <img src="{{ r['thumbnails'][0]['url'] }}" class="card-img-top" alt="video thumbnail">
+      <div class="card-body">
+        <h5 class="card-title"><a href="{{ r['url'] }}" target="_blank" rel="noopener noreferrer">{{ r['title'] }}</a></h5>
+        <p class="card-text"><a href="{{ r['channel_url'] }}" target="_blank" rel="noopener noreferrer">{{ r['channel'] }}</a></p>
       </div>
-      <div class="col-md-8">
-        <div class="card-body">
-          <h5 class="card-title">{{ r['title'] }}</h5>
-          <p class="card-text">{{ r['channel'] }}</p>
-        </div>
-      </div>
+      <form method="post">
+        <button type="submit" name='url' value="{{ r['url'] }}" class="btn btn-primary my-1">Add to queue</button>
+      </form>
     </div>
-    <form method="post">
-      <button type="submit" name='url' value="{{ r['url'] }}" class="btn btn-primary">Add to queue</button>
-    </form>
+{% endfor %}
   </div>
 </div>
-{% endfor %}
 {% endif %}
 
 {% endblock %}
