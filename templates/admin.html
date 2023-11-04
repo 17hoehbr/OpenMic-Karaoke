@@ -5,19 +5,29 @@
 {% endblock %}
 
 {% block content %}
-<div>
+<div class="container">
     <h1>Player Control</h1>
-    <form id="player-control" method="post" class="btn-group d-flex m-3 justify-content-center">
-        <button type="submit" class="btn" name="restart">
-            <img src="./static/icons/rewind.png" alt="Restart">
-        </button>
-        <button type="submit" class="btn" name="pause">
-            <img type="submit" class="btn" src="./static/icons/pause-button.png" alt="Pause">
-        </button>
-        <button type="submit" class="btn" name="skip">
-            <img src="./static/icons/fast-forward.png" alt="Skip">
-        </button>
+    <div id="player-control" class="btn-group d-flex m-3 justify-content-center">
+        <button name="restart" type="button" onclick="restart()" class="btn btn-sm"><img src="./static/icons/rewind.png" alt="Restart" class="img-fluid"></button>
+        <button name="pause" type="button" onclick="pause()" class="btn btn-sm"><img src="./static/icons/pause-button.png" alt="Pause" class="img-fluid"></button>
+        <button name="skip" type="button" onclick="skip()" class="btn btn-sm"><img src="./static/icons/fast-forward.png" alt="Skip" class="img-fluid"></button>
     </form>
 </div>
 
+
+<script>
+    const socket = io("{{ url_for('index') }}");
+
+    function restart(){
+        socket.emit('player_restart');
+    }
+
+    function pause(){
+        socket.emit('player_pause');
+    }
+
+    function skip(){
+        socket.emit('player_skip');
+    }
+</script>
 {% endblock %}

@@ -1,5 +1,20 @@
 {% extends 'mobile_base.html' %}
 
 {% block content %}
-
+<div class="container mt-3">        
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Queue</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in song_queue %}
+          <tr>
+            <td>{{ song_queue[i] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {% endblock %}

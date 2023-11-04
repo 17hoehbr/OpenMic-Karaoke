@@ -13,6 +13,10 @@
 {% endblock %}
 
 {% block content %}
+  <video id="video" autoplay>
+      <source src="/songs/{{ next_song }}.mp4" type="video/mp4">
+  </video>
+
   <script>
     const socket = io("{{ url_for('index') }}");
     const video = document.getElementById('video');
@@ -37,8 +41,4 @@
         location.href = "{{ url_for('tv') }}";
     });
   </script>
-  
-  <video id="video" autoplay>
-      <source src="./songs/{{ song_queue[0] }}" type="video/mp4">
-  </video>
 {% endblock %}
