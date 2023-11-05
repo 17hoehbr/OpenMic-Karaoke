@@ -2,6 +2,7 @@ import socket
 import qrcode
 import os
 import re
+import webbrowser
 from yt_dlp import YoutubeDL
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask_httpauth import HTTPDigestAuth
@@ -13,7 +14,8 @@ socketio = SocketIO(app)
 app.secret_key = os.urandom(12).hex()
 auth = HTTPDigestAuth()
 
-song_queue = {}
+song_queue = []
+song_dict = {}
 
 users = {
     "bryce": "bryce"
@@ -43,11 +45,21 @@ def search_youtube(yt_search):
 
 @app.route("/")
 def index():
+    if len(song_queue) >= 1:
+        now_playing = song_dict[song_queue[0]]
+    else:
+        now_playing = 'Nothing is currently playing'
+
+    if len(song_queue) >= 2:
+        next_song = song_dict[song_queue[1]]
+    else:
+        next_song = 'Nothing is currently queued'
+
     return render_template("mobile_index.html", active="home", now_playing=now_playing, next_song=next_song)
 
 @app.route("/queue")
 def queue():
-    return render_template("queue.html", active="queue", song_queue=song_queue)
+    return render_template("queue.html", active="queue", song_dict=song_dict, song_queue=song_queue)
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
@@ -56,7 +68,6 @@ def search():
         try:
             if 'search' in request.form:
                 song = request.form['search']
-
                 num_results = 5
                 yt_search = f'ytsearch{num_results}:"{song} karaoke"'
                 result = search_youtube(yt_search)
@@ -86,7 +97,7 @@ def tv():
 
 @app.route('/play_video')
 def play_video():
-    next_song = next(iter(song_queue))
+    next_song = song_queue[0]
     return render_template("video_player.html", next_song=next_song)
 
 @app.route('/songs/<path:filename>')
@@ -99,7 +110,8 @@ def start_download(data):
     video_metadata = search_youtube(video_id)
     video_title = re.sub(r'\s*\(.*\)', '', video_metadata['title'])
 
-    song_queue.update({video_id: video_title})
+    song_dict.update({video_id: video_title})
+    song_queue.append(video_id)
 
     if not os.path.isfile(f'./songs/{video_id}.mp4'):
         ydl_opts = {
@@ -122,6 +134,8 @@ def mobile_connect():
 @socketio.on('connect', namespace='/tv')
 def mobile_connect():
     print("TV client connected")
+    if song_queue:
+        socketio.emit('play_video', namespace='/tv')
 
 @socketio.on('player_restart', namespace='/')
 def player_restart():
@@ -135,13 +149,10 @@ def player_pause():
 def player_skip():
     socketio.emit('player_skip', namespace='/tv')
 
-@socketio.on('now_playing', namespace='/tv')
-def now_playing(data):
-    socketio.emit('now_playing', (data['song']), namespace='/')
-
-@socketio.on('next_song', namespace='/tv')
-def next_song(data):
-    socketio.emit('next_song', (data['song']), namespace='/')
+@socketio.on('song_ended', namespace='/tv')
+def song_ended():
+    song_queue.pop(0)
 
 if __name__ == "__main__":
+    webbrowser.open('http://127.0.0.1:8080/tv')
     socketio.run(app, host="0.0.0.0", port=8080)
