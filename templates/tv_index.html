@@ -17,23 +17,25 @@
 {% endblock %}
 
 {% block content %}
-<h1>Welcome to the TV Interface</h1>
+<h2>Welcome to the TV Interface</h2>
 
 <div id="server-ip">
-    <p>Server's Local IP Address:</p>
-    <p>http://{{ local_ip }}</p>
+    <h1>Server's Local IP Address:</h1>
+    <h1>http://{{ local_ip }}</h1>
 </div>
 
 <div id="qr-code">
     <p>Scan QR Code to Access</p>
-    <img id="qr-image" src="/static/qrcode.png" alt="fuck">
+    <img id="qr-image" src="/static/qrcode.png" alt="qrcode">
 </div>
 
 <script>
-    const socket = io("{{ url_for('index') }}");
+    const socket = io("http://127.0.0.1:8080/tv");
+
     socket.on('play_video', function() {
         window.location.replace("{{ url_for('play_video' )}}");
     });
+
 </script>
 
 {% endblock %}

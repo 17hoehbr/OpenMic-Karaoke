@@ -18,7 +18,7 @@
   </video>
 
   <script>
-    const socket = io("{{ url_for('index') }}");
+    const socket = io("{{ url_for('tv') }}");
     const video = document.getElementById('video');
 
     socket.on('player_restart', function() {
