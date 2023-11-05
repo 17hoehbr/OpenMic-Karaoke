@@ -38,8 +38,12 @@
     });
 
     video.addEventListener('ended',function(){
-        socket.emit('song_ended')
-        location.href = "{{ url_for('tv') }}";
+      location.href = "{{ url_for('tv') }}";
     });
+
+    window.onbeforeunload = function () {
+      socket.emit('song_ended');
+    }
+
   </script>
 {% endblock %}
