@@ -53,15 +53,17 @@ def queue():
 def search():
     result = ''
     if request.method == 'POST':
-        if 'search' in request.form:
-            song = request.form['search']
+        try:
+            if 'search' in request.form:
+                song = request.form['search']
 
-            num_results = 5
-            yt_search = f'ytsearch{num_results}:"{song} karaoke"'
-            result = search_youtube(yt_search)
-            
+                num_results = 5
+                yt_search = f'ytsearch{num_results}:"{song} karaoke"'
+                result = search_youtube(yt_search)
+        except Exception as e:
+            print(f"Error during search: {e}")
+
     return render_template("search.html", active="search", result=result)
-
 
 @app.route("/admin")
 #@auth.login_required
@@ -105,9 +107,13 @@ def start_download(data):
             'format': "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
         }
 
+    try:
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download(video_id)
-        
+    except Exception as e:
+        print(f"Error during video download: {e}")
+
+            
     socketio.emit('play_video', namespace='/tv')
 
 @socketio.on('connect', namespace='/')
