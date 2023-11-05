@@ -1,16 +1,22 @@
 {% extends 'mobile_base.html' %}
 
 {% block head %}
-
+<style>
+    .img {
+      height:64px;
+      width:64px;
+      background-color: white;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <h1>Player Control</h1>
     <div id="player-control" class="btn-group d-flex m-3 justify-content-center">
-        <button name="restart" type="button" onclick="restart()" class="btn btn-sm"><img src="./static/icons/rewind.png" alt="Restart" class="img-fluid"></button>
-        <button name="pause" type="button" onclick="pause()" class="btn btn-sm"><img src="./static/icons/pause-button.png" alt="Pause" class="img-fluid"></button>
-        <button name="skip" type="button" onclick="skip()" class="btn btn-sm"><img src="./static/icons/fast-forward.png" alt="Skip" class="img-fluid"></button>
+        <button name="restart" type="button" onclick="restart()" class="btn btn-sm"><img src="./static/icons/rewind.svg" alt="Restart" class="img"></button>
+        <button name="pause" type="button" onclick="pause()" class="btn btn-sm"><img src="./static/icons/pause-btn-fill.svg" alt="Pause" class="img"></button>
+        <button name="skip" type="button" onclick="skip()" class="btn btn-sm"><img src="./static/icons/fast-forward.svg" alt="Skip" class="img"></button>
     </form>
 </div>
 

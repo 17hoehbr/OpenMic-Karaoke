@@ -104,6 +104,8 @@ def play_video():
 def serve_video(filename):
     return send_from_directory('/songs', filename)
 
+# ---------------- Web Socket Listeners ----------------
+
 @socketio.on('start_download')
 def start_download(data):
     video_id = data['video_id']
@@ -152,6 +154,32 @@ def player_skip():
 @socketio.on('song_ended', namespace='/tv')
 def song_ended():
     song_queue.pop(0)
+
+@socketio.on('move_up', namespace='/')
+def move_up(data):
+    print(data)
+    try:
+        pos1 = song_queue.index(data)
+        pos2 = pos1 - 1
+
+        song_queue[pos1], song_queue[pos2] = song_queue[pos2], song_queue[pos1]
+    except:
+        print("error moving item")
+
+@socketio.on('move_down', namespace='/')
+def move_down(data):
+    print(data)
+    try:
+        pos1 = song_queue.index(data)
+        pos2 = pos1 + 1
+
+        song_queue[pos1], song_queue[pos2] = song_queue[pos2], song_queue[pos1]
+    except:
+        print("error moving item")
+
+@socketio.on('del_song', namespace='/')
+def song_ended(data):
+    song_queue.remove(data)
 
 if __name__ == "__main__":
     webbrowser.open('http://127.0.0.1:8080/tv')

@@ -1,20 +1,55 @@
 {% extends 'mobile_base.html' %}
 
+{% block head %}
+<style>
+  .img {
+    height:32px;
+    width:32px;
+    background-color: white;
+  }
+</style>
+{% endblock %}
+
+</style>
 {% block content %}
 <div class="container mt-3">        
-    <table class="table">
-      <thead>
+  <table class="table table-hover table-dark table-stiped">
+    <tbody>
+      {% for i in song_queue %}
         <tr>
-          <th>Queue</th>
+          <td>
+            {{ song_queue.index(i) + 1 }}
+            <div class="btn-group btn-group-sm">
+              {% if song_queue.index(i) >= 1 %} <button type="button" onclick="move_up('{{ i }}')"  class="btn"><img src="./static/icons/arrow-up-circle.svg" alt="up" class="img"></button>{% endif %}
+              {% if song_queue.index(i) < song_queue.index(song_queue[-1]) %}<button type="button" onclick="move_down('{{ i }}')" class="btn"><img src="./static/icons/arrow-down-circle.svg" alt="down" class="img"></button>{% endif %}
+            </div> 
+          </td>
+          <td>{{ song_dict[i] }}</td>
+          {% if song_queue.index(i) >= 1 %}<td><button type="button btn-sm" onclick="del_song('{{ i }}')" class="btn"><img src="./static/icons/trash3.svg" alt="delete" class="img"></button></td>{% endif %}
         </tr>
-      </thead>
-      <tbody>
-        {% for i in song_queue %}
-          <tr>
-            <td>{{ song_dict[i] }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const socket = io("{{ url_for('index') }}");
+
+  function move_down(id) {
+    socket.emit('move_down', id );
+    location.reload();
+  }
+
+  function move_up(id) {
+    socket.emit('move_up', id );
+    location.reload();
+  }
+
+  function del_song(id) {
+    socket.emit('del_song', id );
+    location.reload();
+  }
+
+</script>
+
 {% endblock %}
