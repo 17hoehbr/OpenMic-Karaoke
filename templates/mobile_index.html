@@ -4,14 +4,30 @@
 
 {% endblock %}
 {% block content %}
-  <div >
+  <div>
     <h1>Now Playing</h1>
-    <p>Test</p>
+    <p><span id="now_playing"></span></p>
   </div>
   <hr>
   <div>
     <h1>Next Song</h1>
-    <p>Test</p>
+    <p><span id="next_song"></span></p>
   </div>
+
+  <script>
+    const socket = io("{{ url_for('index') }}");
+
+    socket.on('now_playing', (data) => {
+      console.log('now_playing')
+      var now_playing = data['song'];
+      document.getElementById("now_playing").innerHTML = now_playing;
+    });
+
+    socket.on('next_song', (song) => {
+      console.log('now_playing')
+      var next_song = song;
+      document.getElementById("next_song").innerHTML = next_song;
+    });
+  </script>
 {% endblock %}
 

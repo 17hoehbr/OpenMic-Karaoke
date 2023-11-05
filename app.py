@@ -43,7 +43,7 @@ def search_youtube(yt_search):
 
 @app.route("/")
 def index():
-    return render_template("mobile_index.html", active="home")
+    return render_template("mobile_index.html", active="home", now_playing=now_playing, next_song=next_song)
 
 @app.route("/queue")
 def queue():
@@ -112,7 +112,6 @@ def start_download(data):
             ydl.download(video_id)
     except Exception as e:
         print(f"Error during video download: {e}")
-
             
     socketio.emit('play_video', namespace='/tv')
 
@@ -135,6 +134,14 @@ def player_pause():
 @socketio.on('player_skip', namespace='/')
 def player_skip():
     socketio.emit('player_skip', namespace='/tv')
+
+@socketio.on('now_playing', namespace='/tv')
+def now_playing(data):
+    socketio.emit('now_playing', (data['song']), namespace='/')
+
+@socketio.on('next_song', namespace='/tv')
+def next_song(data):
+    socketio.emit('next_song', (data['song']), namespace='/')
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=8080)

@@ -21,6 +21,10 @@
     const socket = io("{{ url_for('tv') }}");
     const video = document.getElementById('video');
 
+    socket.emit('now_playing', { 'song':"{{ next_song }}.mp4" });
+
+    socket.emit('next_song', { 'song':"{{ next_song }}.mp4" });
+
     socket.on('player_restart', function() {
       video.currentTime = 0;
     });
