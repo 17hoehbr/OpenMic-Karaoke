@@ -3,7 +3,7 @@ import qrcode
 import os
 import re
 import webbrowser
-from yt_dlp import YoutubeDL
+from yt_dlp import YoutubeDL, utils
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask_httpauth import HTTPDigestAuth
 from flask_socketio import SocketIO
@@ -37,7 +37,15 @@ def search_youtube(yt_search):
     }
 
     with YoutubeDL(ydl_opts) as ydl:
-        result = ydl.extract_info(yt_search, download=False)
+        try:
+            result = ydl.extract_info(yt_search, download=False)
+        except utils.DownloadError as e:
+            if "[Errno 101] Network is unreachable" in str(e):
+                print("Network is unreachable. Please check your internet connection.")
+            else:
+                print("Download error")
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
     
     return result
 
@@ -134,7 +142,7 @@ def mobile_connect():
     print("Mobile client connected")
 
 @socketio.on('connect', namespace='/tv')
-def mobile_connect():
+def tv_connect():
     print("TV client connected")
     if song_queue:
         socketio.emit('play_video', namespace='/tv')
