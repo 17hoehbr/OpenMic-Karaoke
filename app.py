@@ -4,6 +4,7 @@ import os
 import re
 import threading
 import webview
+import random
 from yt_dlp import YoutubeDL, utils
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask_socketio import SocketIO
@@ -170,11 +171,22 @@ def move_down(data):
 def song_ended(data):
     song_queue.remove(data)
 
+@socketio.on('queue_random', namespace='/')
+def queue_random():
+    songs = os.listdir(song_dir)
+
+    if len(songs) >= 5:
+        for i in range(5):
+            start_download({'video_id': random.choice(songs).rsplit('.', 1)[0]})
+    else:
+        for i in len(songs):
+            start_download({'video_id': random.choice(songs).rsplit('.', 1)[0]})
+        
 if __name__ == "__main__":
     thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port))
     thread.daemon = True
     thread.start()
 
     window = webview.create_window('Karaoke', 'http://127.0.0.1:8080/tv')
-    webview.start(gui='gtk', debug=True)
+    webview.start(gui='gtk')
     

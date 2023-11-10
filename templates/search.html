@@ -11,6 +11,15 @@
   </form> 
 </div>
 
+{% if not result %}
+
+<div class="container-fluid my-3">
+  <button type="button" onclick=queue_random() class="btn btn-primary">Add 5 random songs</button>
+</div>
+
+{% endif %}
+
+
 {% if result %}
 <div class="container-fluid">
   <div class="row">
@@ -36,6 +45,10 @@
     console.log('downloading')
     socket.emit('start_download', { "video_id": video_id });
     location.href = "{{ url_for('search') }}";
+  }
+
+  function queue_random() {
+    socket.emit('queue_random')
   }
 </script>
 
