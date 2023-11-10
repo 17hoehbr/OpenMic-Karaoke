@@ -6,30 +6,18 @@ import threading
 import webview
 from yt_dlp import YoutubeDL, utils
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
-from flask_httpauth import HTTPDigestAuth
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
 app.secret_key = os.urandom(12).hex()
-auth = HTTPDigestAuth()
 
 song_queue = []
 song_dict = {}
 
 port = '8080'
-users = {
-    "bryce": "bryce"
-}
-
 song_dir = "./songs"
-
-@auth.get_password
-def get_pw(username):
-    if username in users:
-        return users.get(username)
-    return None
 
 # ---------------- Functions ----------------
 
@@ -89,7 +77,6 @@ def search():
     return render_template("search.html", active="search", result=result)
 
 @app.route("/admin")
-#@auth.login_required
 def admin():
     return render_template("admin.html", active="admin")
 
