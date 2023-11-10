@@ -2,7 +2,8 @@ import socket
 import qrcode
 import os
 import re
-import webbrowser
+import threading
+import webview
 from yt_dlp import YoutubeDL, utils
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask_httpauth import HTTPDigestAuth
@@ -17,9 +18,12 @@ auth = HTTPDigestAuth()
 song_queue = []
 song_dict = {}
 
+port = '8080'
 users = {
     "bryce": "bryce"
 }
+
+song_dir = "./songs"
 
 @auth.get_password
 def get_pw(username):
@@ -110,7 +114,7 @@ def play_video():
 
 @app.route('/songs/<path:filename>')
 def serve_video(filename):
-    return send_from_directory('/songs', filename)
+    return send_from_directory(f'{song_dir}', filename)
 
 # ---------------- Web Socket Listeners ----------------
 
@@ -123,17 +127,17 @@ def start_download(data):
     song_dict.update({video_id: video_title})
     song_queue.append(video_id)
 
-    if not os.path.isfile(f'./songs/{video_id}.mp4'):
+    if not os.path.isfile(f'{song_dir}/{video_id}.mp4'):
         ydl_opts = {
-            'outtmpl': f'/songs/{video_id}.mp4',
+            'outtmpl': f'{song_dir}/{video_id}.mp4',
             'format': "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
         }
 
-    try:
-        with YoutubeDL(ydl_opts) as ydl:
-            ydl.download(video_id)
-    except Exception as e:
-        print(f"Error during video download: {e}")
+        try:
+            with YoutubeDL(ydl_opts) as ydl:
+                ydl.download(video_id)
+        except Exception as e:
+            print(f"Error during video download: {e}")
             
     socketio.emit('play_video', namespace='/tv')
 
@@ -190,5 +194,11 @@ def song_ended(data):
     song_queue.remove(data)
 
 if __name__ == "__main__":
-    webbrowser.open('http://127.0.0.1:8080/tv')
-    socketio.run(app, host="0.0.0.0", port=8080)
+    thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port))
+    thread.start()
+
+    window = webview.create_window('Karaoke', 'http://127.0.0.1:8080/tv')
+    webview.start(gui='webkit', debug=True)
+    
+
+    

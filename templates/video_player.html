@@ -13,8 +13,9 @@
 {% endblock %}
 
 {% block content %}
-  <video id="video" autoplay>
+  <video id="video" autoplay controls playsinline>
       <source src="/songs/{{ next_song }}.mp4" type="video/mp4">
+      Your browser does not support the video tag.
   </video>
 
   <script>
@@ -40,10 +41,6 @@
     video.addEventListener('ended',function(){
       location.href = "{{ url_for('tv') }}";
     });
-
-    window.onbeforeunload = function () {
-      socket.emit('song_ended');
-    }
 
   </script>
 {% endblock %}
