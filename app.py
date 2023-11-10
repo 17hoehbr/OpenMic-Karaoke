@@ -195,10 +195,9 @@ def song_ended(data):
 
 if __name__ == "__main__":
     thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port))
+    thread.daemon = True
     thread.start()
 
     window = webview.create_window('Karaoke', 'http://127.0.0.1:8080/tv')
-    webview.start(gui='webkit', debug=True)
-    
-
+    webview.start(gui='gtk', debug=True)
     
