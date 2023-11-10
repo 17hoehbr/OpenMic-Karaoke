@@ -128,16 +128,6 @@ def start_download(data):
             
     socketio.emit('play_video', namespace='/tv')
 
-@socketio.on('connect', namespace='/')
-def mobile_connect():
-    print("Mobile client connected")
-
-@socketio.on('connect', namespace='/tv')
-def tv_connect():
-    print("TV client connected")
-    if song_queue:
-        socketio.emit('play_video', namespace='/tv')
-
 @socketio.on('player_restart', namespace='/')
 def player_restart():
     socketio.emit('player_restart', namespace='/tv')
