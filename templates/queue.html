@@ -2,10 +2,10 @@
 
 {% block head %}
 <style>
-  .img {
-    height:32px;
-    width:32px;
-    background-color: white;
+  .btn-group-sm .btn {
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
   }
 </style>
 {% endblock %}
@@ -17,20 +17,26 @@
     <tbody>
       <thead>
         <th>#</th>
+        <th> </th>
         <th>Song</th>
+        <th> </th>
       </thead>
       {% for i in song_queue %}
         <tr>
           <td>
             {{ loop.index }}
+          </td>
+          <td>
             <div class="btn-group btn-group-sm">
-              {% if loop.index > 2 %} <button type="button" onclick="move_up('{{ i }}')" class="btn"><img src="./static/icons/arrow-up-circle.svg" alt="up" class="img"></button>{% endif %}
-              {% if loop.index < loop.length and loop.index > 1 %} <button type="button" onclick="move_down('{{ i }}')" class="btn"><img src="./static/icons/arrow-down-circle.svg" alt="down" class="img"></button>{% endif %}
+              {% if loop.index > 2 %} <button type="button" onclick="move_up('{{ i }}')" class="btn"><img src="./static/icons/arrow-up-circle.webp" alt="up" class="img"></button>{% endif %}
+              {% if loop.index < loop.length and loop.index > 1 %} <button type="button" onclick="move_down('{{ i }}')" class="btn"><img src="./static/icons/arrow-down-circle.webp" alt="down" class="img"></button>{% endif %}
             </div>
           </td>
           <td>
             {{ song_dict[i] }}
-            {% if loop.index >= 1 %}<button type="button btn-sm" onclick="del_song('{{ i }}')" class="btn"><img src="./static/icons/trash3.svg" alt="delete" class="img"></button>{% endif %}
+          </td>
+          <td>
+            {% if loop.index >= 1 %}<button type="button btn-sm" onclick="del_song('{{ i }}')" class="btn"><img src="./static/icons/trash3.webp" alt="delete" class="img"></button>{% endif %}
           </td>
         </tr>
       {% endfor %}
