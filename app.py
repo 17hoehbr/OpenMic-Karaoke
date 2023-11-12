@@ -5,7 +5,6 @@ import re
 import threading
 import webview
 import random
-import time
 import pyautogui
 from yt_dlp import YoutubeDL, utils
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
@@ -20,7 +19,12 @@ song_queue = []
 song_dict = {}
 
 port = 8080
-song_dir = "./songs"
+cwd = os.path.dirname(__file__)
+song_dir = f"{cwd}/songs"
+
+if not os.path.isdir(song_dir):
+    os.mkdir(song_dir)
+
 
 # ---------------- Functions ----------------
 
@@ -96,9 +100,9 @@ def tv():
 
         local_ip = s.getsockname()[0]
         qr = qrcode.make(local_ip)
-        qr.save("./static/qrcode.png")
+        qr.save(f"{cwd}/static/qrcode.png")
 
-        return render_template("tv_index.html", local_ip=local_ip, port=port  )
+        return render_template("tv_index.html", local_ip=local_ip, port=port)
 
 @app.route('/play_video')
 def play_video():
@@ -109,9 +113,9 @@ def play_video():
 def serve_video(filename):
     return send_from_directory(f'{song_dir}', filename)
 
-# ---------------- Web Socket Listeners ----------------
+# ---------------- Mobile Web Socket Listeners ----------------
 
-@socketio.on('start_download')
+@socketio.on('start_download', namespace='/')
 def start_download(data):
     video_id = data['video_id']
     video_metadata = search_youtube(video_id)
@@ -144,27 +148,9 @@ def player_restart():
 def player_pause():
     socketio.emit('player_pause', namespace='/tv')
 
-# for pause icon in admin portal
-@socketio.on('player_paused', namespace='/tv')
-def player_paused():
-    socketio.emit('player_paused', namespace='/')
-
-@socketio.on('player_resumed', namespace='/tv')
-def player_paused():
-    socketio.emit('player_resumed', namespace='/')
-
 @socketio.on('player_skip', namespace='/')
 def player_skip():
     socketio.emit('player_skip', namespace='/tv')
-
-# workaround for autoplaying video
-@socketio.on('autoplay_workaround', namespace='/tv')
-def autoplay_workaround():
-    pyautogui.press('space')
-
-@socketio.on('song_ended', namespace='/tv')
-def song_ended():
-    song_queue.pop(0)
 
 # queue controls
 @socketio.on('move_up', namespace='/')
@@ -194,6 +180,7 @@ def del_song(data):
     song_queue.remove(data)
 
 # this is mostly just for debugging tbh
+# only queues songs that are already downloaded
 # if I ever make it a proper feature I'll update it to store metadata instead of redownloading it every time
 @socketio.on('queue_random', namespace='/')
 def queue_random():
@@ -203,14 +190,35 @@ def queue_random():
         for i in range(5):
             start_download({'video_id': random.choice(songs).rsplit('.', 1)[0]})
     else:
-        for i in len(songs):
+        for i in range(len(songs)):
             start_download({'video_id': random.choice(songs).rsplit('.', 1)[0]})
+
+
+# ---------------- TV Web Socket Listeners ----------------
+
+# for pause icon in admin portal
+@socketio.on('player_paused', namespace='/tv')
+def player_paused():
+    socketio.emit('player_paused', namespace='/')
+
+@socketio.on('player_resumed', namespace='/tv')
+def player_paused():
+    socketio.emit('player_resumed', namespace='/')
+
+# workaround for autoplaying video
+@socketio.on('autoplay_workaround', namespace='/tv')
+def autoplay_workaround():
+    pyautogui.press('space')
+
+@socketio.on('song_ended', namespace='/tv')
+def song_ended():
+    song_queue.pop(0)
         
 if __name__ == "__main__":
     thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port))
     thread.daemon = True
     thread.start()
 
-    window = webview.create_window('Karaoke', 'http://127.0.0.1:8080/tv')
+    window = webview.create_window('Karaoke', f'http://127.0.0.1:{port}/tv')
     webview.start(gui='gtk')
     

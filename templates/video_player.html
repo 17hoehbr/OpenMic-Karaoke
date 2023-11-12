@@ -22,6 +22,9 @@
     const socket = io("{{ url_for('tv') }}");
     const video = document.getElementById('video');
 
+    // // autoplay workaround
+    socket.emit('autoplay_workaround');
+
     socket.on('player_restart', function() {
       video.currentTime = 0;
     });
@@ -39,11 +42,6 @@
     socket.on('player_skip', function() {
       video.currentTime = video.duration;
     });
-
-    // autoplay workaround
-    window.onload = function() {
-      socket.emit('autoplay_workaround');
-    };
 
     document.addEventListener('keydown', function(event) {
       if (event.keyCode === 32) {
