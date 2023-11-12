@@ -14,7 +14,7 @@
 
 {% block content %}
   <video id="video">
-      <source src="/songs/{{ next_song }}.mp4" type="video/mp4">
+      <source src="/songs/{{ song }}.mp4" type="video/mp4">
       Your browser does not support the video tag.
   </video>
 
@@ -29,19 +29,24 @@
     socket.on('player_pause', function() {
       if (!video.paused) {
           video.pause();
+          socket.emit('player_paused')
       } else {
           video.play();
+          socket.emit('player_resumed')
       }
     });
 
+    socket.on('player_skip', function() {
+      video.currentTime = video.duration;
+    });
+
+    // autoplay workaround
     window.onload = function() {
-      socket.emit('play_video');
+      socket.emit('autoplay_workaround');
     };
 
     document.addEventListener('keydown', function(event) {
-      // Check if the pressed key is the space bar (key code 32)
       if (event.keyCode === 32) {
-        // Toggle video playback
         if (video.paused) {
             video.play();
         } else {
@@ -50,11 +55,8 @@
       }
     });
 
-    socket.on('player_skip', function() {
-      video.currentTime = video.duration;
-    });
-
     video.addEventListener('ended',function(){
+      socket.emit('song_ended')
       location.href = "{{ url_for('tv') }}";
     });
 

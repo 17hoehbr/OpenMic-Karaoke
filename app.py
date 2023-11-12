@@ -87,20 +87,23 @@ def admin():
 
 @app.route("/tv")
 def tv():
-    # get local ip address
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("10.0.0.0", 0))
+    if song_queue:
+        return redirect(url_for('play_video'))
+    else:
+        # get local ip address
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("10.0.0.0", 0))
 
-    local_ip = s.getsockname()[0]
-    qr = qrcode.make(local_ip)
-    qr.save("./static/qrcode.png")
+        local_ip = s.getsockname()[0]
+        qr = qrcode.make(local_ip)
+        qr.save("./static/qrcode.png")
 
-    return render_template("tv_index.html", local_ip=local_ip)
+        return render_template("tv_index.html", local_ip=local_ip, port=port  )
 
 @app.route('/play_video')
 def play_video():
-    next_song = song_queue[0]
-    return render_template("video_player.html", next_song=next_song)
+    song = song_queue[0]
+    return render_template("video_player.html", song=song)
 
 @app.route('/songs/<path:filename>')
 def serve_video(filename):
@@ -128,9 +131,11 @@ def start_download(data):
                 ydl.download(video_id)
         except Exception as e:
             print(f"Error during video download: {e}")
-            
-    socketio.emit('play_video', namespace='/tv')
 
+    if len(song_queue) == 1:
+        socketio.emit('play_video', namespace='/tv')
+
+# admin controls
 @socketio.on('player_restart', namespace='/')
 def player_restart():
     socketio.emit('player_restart', namespace='/tv')
@@ -139,18 +144,29 @@ def player_restart():
 def player_pause():
     socketio.emit('player_pause', namespace='/tv')
 
+# for pause icon in admin portal
+@socketio.on('player_paused', namespace='/tv')
+def player_paused():
+    socketio.emit('player_paused', namespace='/')
+
+@socketio.on('player_resumed', namespace='/tv')
+def player_paused():
+    socketio.emit('player_resumed', namespace='/')
+
 @socketio.on('player_skip', namespace='/')
 def player_skip():
     socketio.emit('player_skip', namespace='/tv')
 
-@socketio.on('play_video', namespace='/tv')
-def play_video():
+# workaround for autoplaying video
+@socketio.on('autoplay_workaround', namespace='/tv')
+def autoplay_workaround():
     pyautogui.press('space')
 
 @socketio.on('song_ended', namespace='/tv')
 def song_ended():
     song_queue.pop(0)
 
+# queue controls
 @socketio.on('move_up', namespace='/')
 def move_up(data):
     print(data)
@@ -174,9 +190,11 @@ def move_down(data):
         print("error moving item")
 
 @socketio.on('del_song', namespace='/')
-def song_ended(data):
+def del_song(data):
     song_queue.remove(data)
 
+# this is mostly just for debugging tbh
+# if I ever make it a proper feature I'll update it to store metadata instead of redownloading it every time
 @socketio.on('queue_random', namespace='/')
 def queue_random():
     songs = os.listdir(song_dir)

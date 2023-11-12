@@ -21,7 +21,7 @@
 
 <div id="server-ip">
     <h1>Server's Local IP Address:</h1>
-    <h1>http://{{ local_ip }}</h1>
+    <h1>http://{{ local_ip }}:{{ port }}</h1>
 </div>
 
 <div id="qr-code">
@@ -30,10 +30,10 @@
 </div>
 
 <script>
-    const socket = io("http://127.0.0.1:8080/tv");
+    const socket = io("{{ url_for('tv') }}");
 
     socket.on('play_video', function() {
-        window.location.replace("{{ url_for('play_video' )}}");
+        window.location.replace("{{ url_for('play_video') }}");
     });
 
 </script>
