@@ -5,19 +5,21 @@ import re
 import threading
 import webview
 import random
+import time
+import pyautogui
 from yt_dlp import YoutubeDL, utils
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='threading')
 
 app.secret_key = os.urandom(12).hex()
 
 song_queue = []
 song_dict = {}
 
-port = '8080'
+port = 8080
 song_dir = "./songs"
 
 # ---------------- Functions ----------------
@@ -140,6 +142,10 @@ def player_pause():
 @socketio.on('player_skip', namespace='/')
 def player_skip():
     socketio.emit('player_skip', namespace='/tv')
+
+@socketio.on('play_video', namespace='/tv')
+def play_video():
+    pyautogui.press('space')
 
 @socketio.on('song_ended', namespace='/tv')
 def song_ended():

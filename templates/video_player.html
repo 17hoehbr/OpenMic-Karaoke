@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block content %}
-  <video id="video" autoplay controls playsinline>
+  <video id="video">
       <source src="/songs/{{ next_song }}.mp4" type="video/mp4">
       Your browser does not support the video tag.
   </video>
@@ -31,6 +31,22 @@
           video.pause();
       } else {
           video.play();
+      }
+    });
+
+    window.onload = function() {
+      socket.emit('play_video');
+    };
+
+    document.addEventListener('keydown', function(event) {
+      // Check if the pressed key is the space bar (key code 32)
+      if (event.keyCode === 32) {
+        // Toggle video playback
+        if (video.paused) {
+            video.play();
+        } else {
+            video.pause();
+        }
       }
     });
 

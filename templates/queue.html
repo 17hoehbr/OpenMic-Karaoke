@@ -40,12 +40,14 @@
           </td>
         </tr>
       {% endfor %}
-      
-    
-    
     </tbody>
   </table>
 </div>
+
+<div class="container-fluid my-3">
+  <button type="button" onclick=queue_random() class="btn btn-primary">Add 5 random songs</button>
+</div>
+
 
 <script>
   const socket = io("{{ url_for('index') }}");
@@ -63,6 +65,10 @@
   function del_song(id) {
     socket.emit('del_song', id );
     location.reload();
+  }
+
+  function queue_random() {
+    socket.emit('queue_random')
   }
 
 </script>

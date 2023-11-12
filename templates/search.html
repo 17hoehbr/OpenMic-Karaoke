@@ -11,15 +11,6 @@
   </form> 
 </div>
 
-{% if not result %}
-
-<div class="container-fluid my-3">
-  <button type="button" onclick=queue_random() class="btn btn-primary">Add 5 random songs</button>
-</div>
-
-{% endif %}
-
-
 {% if result %}
 <div class="container-fluid">
   <div class="row">
@@ -30,7 +21,7 @@
         <h5 class="card-title"><a href="{{ r['url'] }}" target="_blank" rel="noopener noreferrer">{{ r['title'] }}</a></h5>
         <p class="card-text"><a href="{{ r['channel_url'] }}" target="_blank" rel="noopener noreferrer">{{ r['channel'] }}</a></p>
       </div>
-      <form>
+      <div>
         <button type="button" name="selection" onclick="start_download('{{ r['id'] }}')" class="btn btn-primary my-1">Add to queue</button>
       </div>
 {% endfor %}
@@ -45,10 +36,6 @@
     console.log('downloading')
     socket.emit('start_download', { "video_id": video_id });
     location.href = "{{ url_for('search') }}";
-  }
-
-  function queue_random() {
-    socket.emit('queue_random')
   }
 </script>
 
