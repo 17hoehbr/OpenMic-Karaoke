@@ -7,15 +7,10 @@ Stil very early in development! Contributions appreciated, particularly for the 
 ## Features
 
 - Web interface for multiple users to queue tracks
-- Splash screen with connection QR code and "Next up" display
-- Searching/browsing a local song library
+- Splash screen with connection QR
 - Adding new songs from Youtube
-- mp3 + cdg support, including compressed .zip bundles
-- Pause/Skip/Restart and volume control
-- Advanced editing of downloaded file names
+- Pause/Skip/Restart
 - Queue management
-- Key Change / Pitch shifting
-- Lock down features with admin mode
 
 ## Screenshots
 
