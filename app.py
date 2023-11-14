@@ -5,7 +5,7 @@ import re
 import threading
 import webview
 import random
-import pyautogui
+from pynput.keyboard import Key, Controller
 from yt_dlp import YoutubeDL, utils
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask_socketio import SocketIO
@@ -14,6 +14,7 @@ app = Flask(__name__)
 socketio = SocketIO(app, async_mode='threading')
 
 app.secret_key = os.urandom(12).hex()
+keyboard = Controller()
 
 song_queue = []
 song_dict = {}
@@ -24,7 +25,6 @@ song_dir = f"{cwd}/songs"
 
 if not os.path.isdir(song_dir):
     os.mkdir(song_dir)
-
 
 # ---------------- Functions ----------------
 
@@ -208,7 +208,8 @@ def player_paused():
 # workaround for autoplaying video
 @socketio.on('autoplay_workaround', namespace='/tv')
 def autoplay_workaround():
-    pyautogui.press('space')
+    keyboard.press(Key.space)
+    keyboard.release(Key.space)
 
 @socketio.on('song_ended', namespace='/tv')
 def song_ended():

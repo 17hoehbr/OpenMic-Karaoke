@@ -23,8 +23,10 @@
     const video = document.getElementById('video');
 
     // // autoplay workaround
-    socket.emit('autoplay_workaround');
-
+    window.onload = function() {
+      socket.emit('autoplay_workaround');
+    };
+    
     socket.on('player_restart', function() {
       video.currentTime = 0;
     });
