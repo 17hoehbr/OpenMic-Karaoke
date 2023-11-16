@@ -119,6 +119,7 @@ def serve_video(filename):
 def start_download(data):
     video_id = data['video_id']
     video_metadata = search_youtube(video_id)
+    # removed (Karaoke - Version) from title
     video_title = re.sub(r'\s*\(.*\)', '', video_metadata['title'])
 
     song_dict.update({video_id: video_title})
