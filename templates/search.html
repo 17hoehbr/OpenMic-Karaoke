@@ -33,9 +33,16 @@
 <script>
   const socket = io("{{ url_for('index') }}");
 
+  let username = localStorage.getItem("username");
+
+  if (username == null) {
+    let username = prompt("Enter your username");
+    localStorage.setItem("username", username);
+  }
+
   function start_download(video_id) {
     console.log('downloading')
-    socket.emit('start_download', { "video_id": video_id });
+    socket.emit('start_download', video_id, username);
     location.href = "{{ url_for('search') }}";
   }
 </script>

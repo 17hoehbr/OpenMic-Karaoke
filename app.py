@@ -16,7 +16,6 @@ socketio = SocketIO(app, async_mode='threading')
 app.secret_key = os.urandom(12).hex()
 keyboard = Controller()
 
-song_queue = []
 song_dict = {}
 
 port = 8080
@@ -36,15 +35,8 @@ def search_youtube(yt_search):
     }
 
     with YoutubeDL(ydl_opts) as ydl:
-        try:
-            result = ydl.extract_info(yt_search, download=False)
-        except utils.DownloadError as e:
-            if "[Errno 101] Network is unreachable" in str(e):
-                print("Network is unreachable. Please check your internet connection.")
-            else:
-                print("Download error")
-        except Exception as e:
-            print(f"An error occurred: {str(e)}")
+        result = ydl.extract_info(yt_search, download=False)
+
     
     return result
 
@@ -52,13 +44,13 @@ def search_youtube(yt_search):
 
 @app.route("/")
 def index():
-    if len(song_queue) >= 1:
-        now_playing = song_dict[song_queue[0]]
+    if len(song_dict.keys()) >= 1:
+        now_playing = song_dict[0]["title"]
     else:
         now_playing = 'Nothing is currently playing'
 
-    if len(song_queue) >= 2:
-        next_song = song_dict[song_queue[1]]
+    if len(song_dict.keys()) >= 2:
+        next_song = song_dict[1]["title"]
     else:
         next_song = 'Nothing is currently queued'
 
@@ -66,7 +58,7 @@ def index():
 
 @app.route("/queue")
 def queue():
-    return render_template("queue.html", active="queue", song_dict=song_dict, song_queue=song_queue)
+    return render_template("queue.html", active="queue", song_dict=song_dict )
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
@@ -91,7 +83,7 @@ def admin():
 
 @app.route("/tv")
 def tv():
-    if song_queue:
+    if song_dict:
         return redirect(url_for('play_video'))
     else:
         # get local ip address
@@ -106,7 +98,7 @@ def tv():
 
 @app.route('/play_video')
 def play_video():
-    song = song_queue[0]
+    song = song_dict[0]["id"]
     return render_template("video_player.html", song=song)
 
 @app.route('/songs/<path:filename>')
@@ -116,14 +108,14 @@ def serve_video(filename):
 # ---------------- Mobile Web Socket Listeners ----------------
 
 @socketio.on('start_download', namespace='/')
-def start_download(data):
-    video_id = data['video_id']
+def start_download(video_id, username):
     video_metadata = search_youtube(video_id)
     # removed (Karaoke - Version) from title
     video_title = re.sub(r'\s*\(.*\)', '', video_metadata['title'])
 
-    song_dict.update({video_id: video_title})
-    song_queue.append(video_id)
+    num = len(song_dict.keys())
+
+    song_dict.update({num: { "id": video_id, "title": video_title, 'user': username }})
 
     if not os.path.isfile(f'{song_dir}/{video_id}.mp4'):
         ydl_opts = {
@@ -137,7 +129,7 @@ def start_download(data):
         except Exception as e:
             print(f"Error during video download: {e}")
 
-    if len(song_queue) == 1:
+    if num == 0:
         socketio.emit('play_video', namespace='/tv')
 
 # admin controls
@@ -156,29 +148,22 @@ def player_skip():
 # queue controls
 @socketio.on('move_up', namespace='/')
 def move_up(data):
-    print(data)
-    try:
-        pos1 = song_queue.index(data)
-        pos2 = pos1 - 1
+    pos1 = int(data)
+    pos2 = pos1 - 1
 
-        song_queue[pos1], song_queue[pos2] = song_queue[pos2], song_queue[pos1]
-    except:
-        print("error moving item")
+    song_dict[pos1], song_dict[pos2] = song_dict[pos2], song_dict[pos1]
+
 
 @socketio.on('move_down', namespace='/')
 def move_down(data):
-    print(data)
-    try:
-        pos1 = song_queue.index(data)
-        pos2 = pos1 + 1
+    pos1 = int(data)
+    pos2 = pos1 + 1
 
-        song_queue[pos1], song_queue[pos2] = song_queue[pos2], song_queue[pos1]
-    except:
-        print("error moving item")
+    song_dict[pos1], song_dict[pos2] = song_dict[pos2], song_dict[pos1]
 
 @socketio.on('del_song', namespace='/')
-def del_song(data):
-    song_queue.remove(data)
+def del_song(id):
+    song_dict.pop(int(id))
 
 # this is mostly just for debugging tbh
 # only queues songs that are already downloaded
@@ -189,10 +174,10 @@ def queue_random():
 
     if len(songs) >= 5:
         for i in range(5):
-            start_download({'video_id': random.choice(songs).rsplit('.', 1)[0]})
+            start_download(random.choice(songs).rsplit('.', 1)[0], "admin")
     else:
         for i in range(len(songs)):
-            start_download({'video_id': random.choice(songs).rsplit('.', 1)[0]})
+            start_download(random.choice(songs).rsplit('.', 1)[0], "admin")
 
 
 # ---------------- TV Web Socket Listeners ----------------
@@ -214,7 +199,7 @@ def autoplay_workaround():
 
 @socketio.on('song_ended', namespace='/tv')
 def song_ended():
-    song_queue.pop(0)
+    song_dict.pop(0)
         
 if __name__ == "__main__":
     thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port))
@@ -222,5 +207,4 @@ if __name__ == "__main__":
     thread.start()
 
     window = webview.create_window('Karaoke', f'http://127.0.0.1:{port}/tv')
-    webview.start(gui='gtk')
-    
+    webview.start(gui='gtk')    

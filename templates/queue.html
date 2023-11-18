@@ -19,9 +19,10 @@
         <th>#</th>
         <th> </th>
         <th>Song</th>
+        <th>Added by</th>
         <th> </th>
       </thead>
-      {% for i in song_queue %}
+      {% for i in song_dict.keys() %}
         <tr>
           <td>
             {{ loop.index }}
@@ -33,10 +34,13 @@
             </div>
           </td>
           <td>
-            {{ song_dict[i] }}
+            {{ song_dict[i]["title"] }}
           </td>
           <td>
-            {% if loop.index >= 1 %}<button type="button btn-sm" onclick="del_song('{{ i }}')" class="btn"><img src="./static/icons/trash3.webp" alt="delete" class="img"></button>{% endif %}
+            {{ song_dict[i]["user"] }}
+          </td>
+          <td>
+            {% if loop.index > 1 %}<button type="button btn-sm" onclick="del_song('{{ i }}')" class="btn"><img src="./static/icons/trash3.webp" alt="delete" class="img"></button>{% endif %}
           </td>
         </tr>
       {% endfor %}
@@ -63,7 +67,7 @@
   }
 
   function del_song(id) {
-    socket.emit('del_song', id );
+    socket.emit('del_song', id);
     location.reload();
   }
 
