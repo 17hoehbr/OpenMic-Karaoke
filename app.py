@@ -45,12 +45,12 @@ def search_youtube(yt_search):
 @app.route("/")
 def index():
     if len(song_dict.keys()) >= 1:
-        now_playing = song_dict[0]["title"]
+        now_playing = song_dict[list(song_dict.keys())[0]]["title"]
     else:
         now_playing = 'Nothing is currently playing'
 
     if len(song_dict.keys()) >= 2:
-        next_song = song_dict[1]["title"]
+        next_song = song_dict[list(song_dict.keys())[1]]["title"]
     else:
         next_song = 'Nothing is currently queued'
 
@@ -98,7 +98,7 @@ def tv():
 
 @app.route('/play_video')
 def play_video():
-    song = song_dict[0]["id"]
+    song = song_dict[list(song_dict.keys())[0]]["id"]
     return render_template("video_player.html", song=song)
 
 @app.route('/songs/<path:filename>')
@@ -192,14 +192,16 @@ def player_paused():
     socketio.emit('player_resumed', namespace='/')
 
 # workaround for autoplaying video
-@socketio.on('autoplay_workaround', namespace='/tv')
+@socketio.on('press_spacebar', namespace='/tv')
 def autoplay_workaround():
+    print("Playing video!")
     keyboard.press(Key.space)
     keyboard.release(Key.space)
 
 @socketio.on('song_ended', namespace='/tv')
 def song_ended():
-    song_dict.pop(0)
+    song_dict.pop(list(song_dict.keys())[0])
+
         
 if __name__ == "__main__":
     thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port))

@@ -13,18 +13,35 @@
 {% endblock %}
 
 {% block content %}
-  <video id="video">
-      <source src="/songs/{{ song }}.mp4" type="video/mp4">
-      Your browser does not support the video tag.
+  <video id="video" autoplay controls>
+    <source src="/songs/{{ song }}.mp4" type="video/mp4">
+    Your browser does not support the video tag.
   </video>
 
   <script>
     const socket = io("{{ url_for('tv') }}");
     const video = document.getElementById('video');
 
-    // // autoplay workaround
-    socket.emit('autoplay_workaround');
-    
+    // autoplay workaround
+    document.addEventListener('load',
+      socket.emit('press_spacebar')
+    );
+
+    document.addEventListener('keydown', function(event) {
+      if (event.keyCode === 32) {
+        if (video.paused) {
+            video.play();
+        } else {
+            video.pause();
+        }
+      }
+    });
+
+    video.addEventListener('ended',function() {
+      socket.emit('song_ended')
+      location.href = "{{ url_for('tv') }}";
+    });
+
     socket.on('player_restart', function() {
       video.currentTime = 0;
     });
@@ -41,21 +58,6 @@
 
     socket.on('player_skip', function() {
       video.currentTime = video.duration;
-    });
-
-    document.addEventListener('keydown', function(event) {
-      if (event.keyCode === 32) {
-        if (video.paused) {
-            video.play();
-        } else {
-            video.pause();
-        }
-      }
-    });
-
-    video.addEventListener('ended',function(){
-      socket.emit('song_ended')
-      location.href = "{{ url_for('tv') }}";
     });
 
   </script>

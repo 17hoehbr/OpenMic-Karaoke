@@ -12,6 +12,8 @@ a = Analysis(
         'pywebview',
         'pygobject',
         'engineio.async_drivers.threading',
+        "pynput.keyboard._xorg",
+        "pynput.keyboard._wayland",
     ],
     hookspath=[],
     hooksconfig={},
