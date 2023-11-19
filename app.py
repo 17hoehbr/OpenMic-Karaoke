@@ -5,7 +5,6 @@ import re
 import threading
 import webview
 import random
-from pynput.keyboard import Key, Controller
 from yt_dlp import YoutubeDL, utils
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask_socketio import SocketIO
@@ -14,7 +13,6 @@ app = Flask(__name__)
 socketio = SocketIO(app, async_mode='threading')
 
 app.secret_key = os.urandom(12).hex()
-keyboard = Controller()
 
 song_dict = {}
 
@@ -191,12 +189,14 @@ def player_paused():
 def player_paused():
     socketio.emit('player_resumed', namespace='/')
 
-# workaround for autoplaying video
-@socketio.on('press_spacebar', namespace='/tv')
+@socketio.on('autoplay_workaround', namespace='/tv')
 def autoplay_workaround():
-    print("Playing video!")
-    keyboard.press(Key.space)
-    keyboard.release(Key.space)
+    window.evaluate_js(
+        r"""
+        const video = document.getElementById('video');
+        video.play();
+        """
+    )
 
 @socketio.on('song_ended', namespace='/tv')
 def song_ended():
