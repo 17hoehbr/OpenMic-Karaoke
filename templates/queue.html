@@ -22,7 +22,7 @@
         <th>Added by</th>
         <th> </th>
       </thead>
-      {% for i in song_dict.keys() %}
+      {% for i in song_queue.keys() %}
         <tr>
           <td>
             {{ loop.index }}
@@ -34,10 +34,10 @@
             </div>
           </td>
           <td>
-            {{ song_dict[i]["title"] }}
+            {{ song_queue[i]["title"] }}
           </td>
           <td>
-            {{ song_dict[i]["user"] }}
+            {{ song_queue[i]["user"] }}
           </td>
           <td>
             {% if loop.index > 1 %}<button type="button btn-sm" onclick="del_song('{{ i }}')" class="btn"><img src="./static/icons/trash3.webp" alt="delete" class="img"></button>{% endif %}
@@ -56,6 +56,13 @@
 <script>
   const socket = io("{{ url_for('index') }}");
 
+  let username = localStorage.getItem("username");
+
+  if (username == null) {
+    let username = prompt("Enter your username");
+    localStorage.setItem("username", username);
+  }
+
   function move_down(id) {
     socket.emit('move_down', id );
     location.reload();
@@ -72,7 +79,7 @@
   }
 
   function queue_random() {
-    socket.emit('queue_random')
+    socket.emit('queue_random', username)
   }
 
 </script>
