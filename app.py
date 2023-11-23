@@ -204,7 +204,7 @@ def song_ended():
 
         
 if __name__ == "__main__":
-    thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port))
+    thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True ))
     thread.daemon = True
     thread.start()
 
