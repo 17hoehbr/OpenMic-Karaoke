@@ -3,8 +3,8 @@ jobs:
   pyinstaller-build:
     runs-on: ubuntu-20.04
     steps:
-      - name: Install Pycairo
-        run: sudo apt install libcairo2-dev
+      - name: Install dependencies
+        run: sudo apt install libcairo2-dev libgirepository1.0-dev
       - name: Create Executable
         uses: sayyid5416/pyinstaller@v1
         with:
