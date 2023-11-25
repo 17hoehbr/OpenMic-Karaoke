@@ -89,7 +89,7 @@ def tv():
         s.connect(("10.0.0.0", 0))
 
         local_ip = s.getsockname()[0]
-        qr = qrcode.make(local_ip)
+        qr = qrcode.make(f'http://{local_ip}:{port}')
         qr.save(f"{cwd}/static/qrcode.png")
 
         return render_template("tv_index.html", local_ip=local_ip, port=port)
@@ -208,5 +208,5 @@ if __name__ == "__main__":
     thread.daemon = True
     thread.start()
 
-    window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv')
+    window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv', fullscreen=True)
     webview.start(gui='gtk')    
