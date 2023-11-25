@@ -5,6 +5,9 @@ import re
 import threading
 import webview
 import random
+import gi
+gi.require_version('WebKit', '3.0')
+from gi.repository import WebKit
 from time import sleep
 from yt_dlp import YoutubeDL, utils
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
