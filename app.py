@@ -207,4 +207,4 @@ if __name__ == "__main__":
     thread.start()
 
     window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv', fullscreen=True)
-    webview.start(gui='qt')    
+    webview.start(gui='gtk')    
