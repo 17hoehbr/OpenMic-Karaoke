@@ -5,8 +5,6 @@ import re
 import threading
 import webview
 import random
-import gi
-from gi.repository import WebKit2
 from yt_dlp import YoutubeDL, utils
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask_socketio import SocketIO
