@@ -10,7 +10,11 @@ a = Analysis(
     ],
     hiddenimports=[
         'pywebview',
-        'pygobject',
+        'pywebview.platforms',
+        'pywebview.platforms.gtk',
+        'pywebview.platforms.gtk.WebView',
+        'gi.repository',
+        'gi.repository.WebKit2',
         'engineio.async_drivers.threading',
     ],
     hookspath=[],
