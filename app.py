@@ -5,10 +5,6 @@ import re
 import threading
 import webview
 import random
-import gi
-gi.require_version('WebKit', '3.0')
-from gi.repository import WebKit
-from time import sleep
 from yt_dlp import YoutubeDL, utils
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask_socketio import SocketIO
@@ -86,7 +82,6 @@ def admin():
 @app.route("/tv")
 def tv():
     if song_queue:
-        sleep(5)
         return redirect(url_for('play_video'))
     else:
         # get local ip address
@@ -113,7 +108,8 @@ def serve_video(filename):
 @socketio.on('start_download', namespace='/')
 def start_download(video_id, username):
     video_metadata = search_youtube(video_id)
-    video_title = video_metadata['title']
+    # removed (Karaoke - Version) from title
+    video_title = re.sub(r'\s*\(.*\)', '', video_metadata['title'])
 
     num = len(song_queue.keys())
 
@@ -130,6 +126,9 @@ def start_download(video_id, username):
                 ydl.download(video_id)
         except Exception as e:
             print(f"Error during video download: {e}")
+    
+    if num == 0:
+        socketio.emit('play_video', namespace='/tv')
 
 # admin controls
 @socketio.on('player_restart', namespace='/')
