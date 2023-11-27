@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=OpenMic
 Exec=./OpenMic
-Icon=/static/icons/logo
+Icon=/home/runner/work/OpenMic-Karaoke/OpenMic-Karaoke/AppDir/logo.png
 Type=Application
 Categories=Game;
