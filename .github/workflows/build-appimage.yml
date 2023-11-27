@@ -37,6 +37,7 @@ jobs:
         mkdir -p AppDir
         cp dist/OpenMic AppDir/
         cp OpenMic.desktop AppDir/
+        cp static/icons/logo.png AppDir/
 
     - name: Download linuxdeploy
       run: |
