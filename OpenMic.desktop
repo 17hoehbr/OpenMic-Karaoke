@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=OpenMic
 Exec=./OpenMic
-Icon=/static/icons/logo.png
+Icon=/static/icons/logo
 Type=Application
 Categories=Game;
