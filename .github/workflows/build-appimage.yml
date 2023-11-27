@@ -49,10 +49,10 @@ jobs:
         ./linuxdeploy --appdir=AppDir --output appimage
 
     - name: Move AppImage to artifacts
-      run: mv *.AppImage $GITHUB_WORKSPACE
-
+      run: mv OpenMic-x86_64.AppImage $GITHUB_WORKSPACE/artifacts/
+    
     - name: Upload AppImage as artifact
       uses: actions/upload-artifact@v2
       with:
-        name: your_appimage
-        path: $GITHUB_WORKSPACE/*.AppImage
+        name: OpenMic
+        path: $GITHUB_WORKSPACE/artifacts/*.AppImage
