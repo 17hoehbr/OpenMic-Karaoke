@@ -46,7 +46,7 @@ jobs:
 
     - name: Create AppImage
       run: |
-        ./linuxdeploy --appdir=AppDir --output appimage
+        ./linuxdeploy --appdir=AppDir --output appimage --desktop-file AppDir/OpenMic.desktop --icon-file AppDir/openmic.png
 
     - name: Upload AppImage as artifact
       uses: actions/upload-artifact@v3
