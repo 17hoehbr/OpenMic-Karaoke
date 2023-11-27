@@ -4,30 +4,39 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'app.py'
+      - 'build.spec'
+      - 'OpenMic.desktop'
+      - 'requirements.txt'
+      - 'templates/**'
+      - 'static/**'
+      - '.github/workflows/build-appimage.yml'
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
-        python-version: 3.8
+        python-version: 3.12
 
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libglib2.0-0 libgtk-3-0 libwebkit2gtk-4.0-37 libfuse2
-
+        sudo apt-get install -y libglib2.0-0 libgtk-3-0 libwebkit2gtk-4.0-37 libfuse2 appstream libgirepository1.0-dev python3-gi python3-gi-cairo gobject-introspection gir1.2-gtk-3.0 gir1.2-webkit2-4.0
     - name: Install build tools
       run: sudo apt-get install -y build-essential
 
     - name: Install PyInstaller
-      run: pip install pyinstaller
+      run: |
+        pip install pyinstaller
+        pip install -r requirements.txt
 
     - name: Build executable
       run: pyinstaller build.spec  # Replace "your_script.py" with the entry point of your Python application
@@ -37,7 +46,7 @@ jobs:
         mkdir -p AppDir
         cp dist/OpenMic AppDir/
         cp OpenMic.desktop AppDir/
-        cp static/icons/logo.png AppDir/
+        cp static/icons/logo.png AppDir/openmic.png
 
     - name: Download linuxdeploy
       run: |
@@ -46,13 +55,10 @@ jobs:
 
     - name: Create AppImage
       run: |
-        ./linuxdeploy --appdir=AppDir --output appimage
-
-    - name: Move AppImage to artifacts
-      run: mv *.AppImage $GITHUB_WORKSPACE
+        ./linuxdeploy --appdir=AppDir --output appimage --desktop-file AppDir/OpenMic.desktop --icon-file AppDir/openmic.png --executable AppDir/OpenMic
 
     - name: Upload AppImage as artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
-        name: your_appimage
-        path: $GITHUB_WORKSPACE/*.AppImage
+        name: OpenMic
+        path: OpenMic-x86_64.AppImage
