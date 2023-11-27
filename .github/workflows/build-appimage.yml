@@ -36,6 +36,7 @@ jobs:
       run: |
         mkdir -p AppDir
         cp dist/OpenMic AppDir/
+        cp OpenMic.desktop AppDir/
 
     - name: Download linuxdeploy
       run: |
