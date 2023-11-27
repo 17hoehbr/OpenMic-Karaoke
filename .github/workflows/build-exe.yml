@@ -25,3 +25,9 @@ jobs:
 
     - name: Build executable
       run: pyinstaller build.spec  # Replace 'your_script.py' with the actual name of your Python script
+
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: dist
