@@ -7,6 +7,7 @@ import webview
 import random
 import json
 import glob
+import platform
 from time import sleep
 from yt_dlp import YoutubeDL
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
