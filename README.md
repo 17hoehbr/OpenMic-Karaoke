@@ -18,8 +18,8 @@ Stil very early in development! Contributions appreciated, particularly for the 
 
 <p float="left">
 
-  <img width="400" alt="tv1" src="https://github.com/17hoehbr/OpenMic-Karaoke/assets/1351017/9d3ebfa7-5b18-4ba6-9711-bd26b15c4e03">
-  <img width="400" alt="tv2" src="https://github.com/17hoehbr/OpenMic-Karaoke/assets/1351017/02c363bf-c2cb-4d86-a2e9-ce887f07d757">
+  <img width="400" alt="tv1" src="https://github.com/17hoehbr/OpenMic-Karaoke/assets/1351017/009f6287-6610-4aff-afc5-e5b9f42a6148">
+  <img width="400" alt="tv2" src="https://github.com/17hoehbr/OpenMic-Karaoke/assets/1351017/aac68a30-edc6-4bc1-8764-df497eb6b3da">
 
 ### Web interface
 
