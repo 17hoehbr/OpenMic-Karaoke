@@ -79,7 +79,7 @@ def admin():
 @app.route("/tv")
 def tv():
     if song_queue:
-        return redirect(url_for('play_video'))
+        return redirect(url_for('up_next'))
     else:
         # get local ip address
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -91,6 +91,12 @@ def tv():
 
         return render_template("tv_index.html", local_ip=local_ip, port=port)
 
+@app.route("/up_next")
+def up_next():
+    song = song_queue[list(song_queue.keys())[0]]
+
+    return render_template("up_next.html", song=song)
+
 @app.route('/play_video')
 def play_video():
     song = song_queue[list(song_queue.keys())[0]]["id"]
@@ -101,7 +107,6 @@ def play_video():
         next_song = ''
 
     # waits until song is available before playing
-    # very hacky, need to add an intermediary page at some point with next up and qrcode
     while os.path.isfile(f'{song_dir}/{song}.mp4') == False:
         sleep(1)
 
@@ -122,22 +127,21 @@ def start_download(video_id, video_title, username):
 
     song_queue.update({num: { "id": video_id, "title": video_title, 'user': username }})
 
+    if num == 0:
+        socketio.emit('play_video', namespace='/tv')
+
     if not os.path.isfile(f'{song_dir}/{video_id}.mp4'):
         ydl_opts = {
             'outtmpl': f'{song_dir}/{video_id}.mp4',
-            'format': "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+            'format': "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]",
             'writeinfojson': True
         }
-            
+
         try:
             with YoutubeDL(ydl_opts) as ydl:
                 ydl.download(video_id)
         except Exception as e:
             print(f"Error during video download: {e}")
-
-
-    if num == 0:
-        socketio.emit('play_video', namespace='/tv')
 
 # admin controls
 @socketio.on('player_restart', namespace='/')
@@ -180,20 +184,21 @@ def queue_random(username):
     
     songs_random = []
 
-    for i in range(0, 5):
-        songs_random.append(random.choice(songs))
+    if songs:
+        for i in range(0, 5):
+            songs_random.append(random.choice(songs))
 
-    for i in songs_random:
-        song = i.split('.')[0]
-        with open(f'{song}.info.json') as json_data:
-            data = json.load(json_data)
+        for i in songs_random:
+            song = i.split('.')[0]
+            with open(f'{song}.info.json') as json_data:
+                data = json.load(json_data)
 
-        num = len(song_queue.keys())
+            num = len(song_queue.keys())
 
-        song_queue.update({num: { "id": data['id'], "title": data['title'], 'user': username }})
+            song_queue.update({num: { "id": data['id'], "title": data['title'], 'user': username }})
 
-        if num == 0:
-            socketio.emit('play_video', namespace='/tv')
+            if num == 0:
+                socketio.emit('play_video', namespace='/tv')
     
 
 # ---------------- TV Web Socket Listeners ----------------

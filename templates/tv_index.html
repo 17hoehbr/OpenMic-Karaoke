@@ -52,7 +52,7 @@
     const socket = io("{{ url_for('tv') }}");
 
     socket.on('play_video', function() {
-        window.location.replace("{{ url_for('play_video') }}");
+        window.location.replace("{{ url_for('up_next') }}");
     });
 
 </script>
