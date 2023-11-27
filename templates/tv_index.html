@@ -1,32 +1,51 @@
 {% extends 'tv_base.html' %}
 
 {% block head %}
-<style>
+<!-- <style>
     body {
         font-family: Arial, sans-serif;
         text-align: center;
     }
+
+    #title {
+        margin-top: 20px;
+        color: #f2b70d;
+    }
+
     #server-ip {
-        font-size: 24px;
         margin-top: 20px;
     }
+
     #qr-code {
-        margin-top: 20px;
+        margin: 0;
+        position: absolute;
+        top: 50%;
+        left: 50%;
     }
-</style>
+</style> -->
 {% endblock %}
 
 {% block content %}
-<h2>Welcome to the TV Interface</h2>
+<div class="container text-center">
+    <div class="row pt-3">
+        <div class="col text-warning" id="title">
+            <h2><img id="logo" src="/static/icons/logo.png" alt="logo" width="32px" height="32px"> OpenMic Karaoke! <img id="logo" src="/static/icons/logo.png" alt="logo" width="32px" height="32px"></h2>
+        </div>
+    </div>
 
-<div id="server-ip">
-    <h1>Server's Local IP Address:</h1>
-    <h1>http://{{ local_ip }}:{{ port }}</h1>
-</div>
+    <div class="row pt-3">
+        <div class="col" id="server-ip">
+            <h3>IP Address:</h3>
+            <h3>http://{{ local_ip }}:{{ port }}</h3>
+        </div>
+    </div>
 
-<div id="qr-code">
-    <p>Scan QR Code to Access</p>
-    <img id="qr-image" src="/static/qrcode.png" alt="qrcode">
+    <div class="row pt-5">
+        <div class="col" id="qr-code">
+            <p>Scan QR Code to add a song</p>
+            <img id="qr-image" src="/static/qrcode.png" alt="qrcode">
+        </div>
+    </div>
 </div>
 
 <script>
