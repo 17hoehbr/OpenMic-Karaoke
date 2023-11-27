@@ -11,6 +11,7 @@ a = Analysis(
     hiddenimports=[
         'pywebview',
         'pygobject',
+        'qrcode',
         'engineio.async_drivers.threading',
     ],
     hookspath=[],
