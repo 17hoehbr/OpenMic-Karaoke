@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'app.py'
+      - 'build.spec'
+      - 'OpenMic.desktop'
+      - 'requirements.txt'
+      - 'templates/**'
+      - 'static/**'
+      - '.github/workflows/build-appimage.yml'
 
 jobs:
   build:
