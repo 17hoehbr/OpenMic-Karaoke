@@ -52,4 +52,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: OpenMic
-        path: $GITHUB_WORKSPACE/*.AppImage
+        path: OpenMic-x86_64.AppImage
