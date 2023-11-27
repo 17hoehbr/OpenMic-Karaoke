@@ -30,12 +30,12 @@ jobs:
       run: pip install pyinstaller
 
     - name: Build executable
-      run: pyinstaller --onefile your_script.py  # Replace "your_script.py" with the entry point of your Python application
+      run: pyinstaller build.spec  # Replace "your_script.py" with the entry point of your Python application
 
     - name: Create AppDir
       run: |
         mkdir -p AppDir
-        cp dist/your_script AppDir/
+        cp dist/OpenMic AppDir/
 
     - name: Download linuxdeploy
       run: |
