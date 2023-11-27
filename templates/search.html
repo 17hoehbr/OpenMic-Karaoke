@@ -22,7 +22,7 @@
         <p class="card-text"><a href="{{ r['channel_url'] }}" target="_blank" rel="noopener noreferrer">{{ r['channel'] }}</a></p>
       </div>
       <div>
-        <button type="button" name="selection" onclick="start_download('{{ r['id'] }}')" class="btn btn-primary my-1">Add to queue</button>
+        <button type="button" name="selection" onclick="start_download('{{ r['id'] }}', '{{ r['title'] }}')" class="btn btn-primary my-1">Add to queue</button>
       </div>
     </div>
 {% endfor %}
@@ -40,9 +40,8 @@
     localStorage.setItem("username", username);
   }
 
-  function start_download(video_id) {
-    console.log('downloading')
-    socket.emit('start_download', video_id, username);
+  function start_download(video_id, video_title) {
+    socket.emit('start_download', video_id, video_title, username);
     location.href = "{{ url_for('search') }}";
   }
 </script>

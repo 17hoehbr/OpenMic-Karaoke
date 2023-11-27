@@ -5,8 +5,11 @@ import re
 import threading
 import webview
 import random
-from yt_dlp import YoutubeDL, utils
-from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
+import json
+import glob
+from time import sleep
+from yt_dlp import YoutubeDL
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
@@ -22,21 +25,6 @@ song_dir = f"{cwd}/songs"
 
 if not os.path.isdir(song_dir):
     os.mkdir(song_dir)
-
-# ---------------- Functions ----------------
-
-def search_youtube(yt_search):
-    ydl_opts = {
-        'format': 'best',   # You can specify the format you want
-        'extract_flat': True,
-        'extract_no_playlists': True
-    }
-
-    with YoutubeDL(ydl_opts) as ydl:
-        result = ydl.extract_info(yt_search, download=False)
-
-    
-    return result
 
 # ---------------- Mobile Routes ----------------
 
@@ -67,7 +55,16 @@ def search():
                 song = request.form['search']
                 num_results = 5
                 yt_search = f'ytsearch{num_results}:"{song} karaoke"'
-                result = search_youtube(yt_search)
+
+                ydl_opts = {
+                    'format': 'best',
+                    'extract_flat': True,
+                    'extract_no_playlists': True
+                }
+
+                with YoutubeDL(ydl_opts) as ydl:
+                    result = ydl.extract_info(yt_search, download=False)
+
         except Exception as e:
             print(f"Error during search: {e}")
 
@@ -97,6 +94,12 @@ def tv():
 @app.route('/play_video')
 def play_video():
     song = song_queue[list(song_queue.keys())[0]]["id"]
+
+    # waits until song is available before playing
+    # very hacky, need to add an intermediary page at some point with next up and qrcode
+    while os.path.isfile(f'{song_dir}/{song}.mp4') == False:
+        sleep(1)
+
     return render_template("video_player.html", song=song)
 
 @app.route('/songs/<path:filename>')
@@ -106,10 +109,9 @@ def serve_video(filename):
 # ---------------- Mobile Web Socket Listeners ----------------
 
 @socketio.on('start_download', namespace='/')
-def start_download(video_id, username):
-    video_metadata = search_youtube(video_id)
-    # removed (Karaoke - Version) from title
-    video_title = re.sub(r'\s*\(.*\)', '', video_metadata['title'])
+def start_download(video_id, video_title, username):
+    # removes (Karaoke - Version) from title
+    video_title = re.sub(r'\s*\(.*\)', '', video_title)
 
     num = len(song_queue.keys())
 
@@ -118,15 +120,17 @@ def start_download(video_id, username):
     if not os.path.isfile(f'{song_dir}/{video_id}.mp4'):
         ydl_opts = {
             'outtmpl': f'{song_dir}/{video_id}.mp4',
-            'format': "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+            'format': "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+            'writeinfojson': True
         }
-
+            
         try:
             with YoutubeDL(ydl_opts) as ydl:
                 ydl.download(video_id)
         except Exception as e:
             print(f"Error during video download: {e}")
-    
+
+
     if num == 0:
         socketio.emit('play_video', namespace='/tv')
 
@@ -168,15 +172,25 @@ def del_song(id):
 # if I ever make it a proper feature I'll update it to store metadata instead of redownloading it every time
 @socketio.on('queue_random', namespace='/')
 def queue_random(username):
-    songs = os.listdir(song_dir)
+    songs = glob.glob(f'{song_dir}/*.mp4')
+    
+    songs_random = []
 
-    if len(songs) >= 5:
-        for i in range(5):
-            start_download(random.choice(songs).rsplit('.', 1)[0], username)
-    else:
-        for i in range(len(songs)):
-            start_download(random.choice(songs).rsplit('.', 1)[0], username)
+    for i in range(0, 5):
+        songs_random.append(random.choice(songs))
 
+    for i in songs_random:
+        song = i.split('.')[0]
+        with open(f'{song}.info.json') as json_data:
+            data = json.load(json_data)
+
+        num = len(song_queue.keys())
+
+        song_queue.update({num: { "id": data['id'], "title": data['title'], 'user': username }})
+
+        if num == 0:
+            socketio.emit('play_video', namespace='/tv')
+    
 
 # ---------------- TV Web Socket Listeners ----------------
 
@@ -208,5 +222,5 @@ if __name__ == "__main__":
     thread.daemon = True
     thread.start()
 
-    window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv', fullscreen=True)
+    window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv', fullscreen=False)
     webview.start(gui='gtk')    
