@@ -232,4 +232,12 @@ if __name__ == "__main__":
     thread.start()
 
     window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv', fullscreen=False)
-    webview.start(gui='gtk')    
+    
+    if platform.system() == 'Darwin':  # Mac
+        webview.start()
+    elif platform.system() == 'Linux':  # Linux
+        webview.start(gui='gtk')
+    elif platform.system() == 'Windows':  # Windows
+        webview.start()
+    else:
+        print("Unsupported operating system")
