@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - main  # Change this to your default branch
+    paths:
+      - 'app.py'
+      - 'build.spec'
+      - 'OpenMic.desktop'
+      - 'requirements.txt'
+      - 'templates/**'
+      - 'static/**'
+      - '.github/workflows/build-exe.yml'
 
 jobs:
   build:
