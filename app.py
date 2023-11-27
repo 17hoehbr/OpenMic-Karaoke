@@ -167,9 +167,8 @@ def move_down(data):
 def del_song(id):
     song_queue.pop(int(id))
 
-# this is mostly just for debugging tbh
+
 # only queues songs that are already downloaded
-# if I ever make it a proper feature I'll update it to store metadata instead of redownloading it every time
 @socketio.on('queue_random', namespace='/')
 def queue_random(username):
     songs = glob.glob(f'{song_dir}/*.mp4')
