@@ -28,3 +28,5 @@ Stil very early in development! Contributions appreciated, particularly for the 
 <img width="250" style="float:left" alt="queue" src="https://github.com/17hoehbr/OpenMic-Karaoke/assets/1351017/764b2096-6d60-41b9-923c-3f83c433110a">
 <img width="250" style="float:left" alt="search" src="https://github.com/17hoehbr/OpenMic-Karaoke/assets/1351017/fcdbc19e-ec0f-4722-908a-cfc1b9bf4a04">
 <img width="250" style="float:left" alt="admin" src="https://github.com/17hoehbr/OpenMic-Karaoke/assets/1351017/304af1f6-085c-4386-9bcf-9fbbdfc838d0">
+
+<a href="https://www.flaticon.com/free-icons/microphone" title="microphone icons">Microphone icons created by Freepik - Flaticon</a>
