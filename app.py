@@ -8,7 +8,8 @@ import random
 import json
 import glob
 import platform
-from gi.repository import WebKit2
+import gi
+gi.require_version('WebKit2', '4.0')
 from time import sleep
 from yt_dlp import YoutubeDL
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
