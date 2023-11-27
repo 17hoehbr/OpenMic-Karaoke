@@ -95,12 +95,17 @@ def tv():
 def play_video():
     song = song_queue[list(song_queue.keys())[0]]["id"]
 
+    if len(list(song_queue.keys())) > 1:
+        next_song = song_queue[list(song_queue.keys())[1]]
+    else:
+        next_song = ''
+
     # waits until song is available before playing
     # very hacky, need to add an intermediary page at some point with next up and qrcode
     while os.path.isfile(f'{song_dir}/{song}.mp4') == False:
         sleep(1)
 
-    return render_template("video_player.html", song=song)
+    return render_template("video_player.html", song=song, next_song=next_song)
 
 @app.route('/songs/<path:filename>')
 def serve_video(filename):

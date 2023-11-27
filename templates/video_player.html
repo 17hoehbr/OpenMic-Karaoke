@@ -1,23 +1,73 @@
 {% extends 'tv_base.html' %}
 {% block head %}
   <style>
-    video{
+    #video-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%; /* Ensures that the video takes the full width of its container */
+    }
+
+    video {
       width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      position: fixed;
-      top: 0;
-      left: 0;
+      height: 90vh;
+      object-fit: contain;
+    }
+
+    .banner {
+      position: absolute;
+      width: 100%;
+      z-index: 1; /* Adjust the z-index to make sure banners appear above the video */
+    }
+
+    .top-left-banner {
+      top: 10px;
+      text-align: left;
+    }
+
+    .top-right-banner {
+      top: 10px;
+      text-align: right;
+    }
+
+    .bottom-banner {
+      bottom: 10px;
+      text-align: center;
+      color: #f2b70d;
     }
   </style>
 {% endblock %}
 
 {% block content %}
-  <video id="video">
-    <source src="/songs/{{ song }}.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
+  <div id="player" class="container-fluid">
+    <div class="row">
+      <div class="col-12 banner top-left-banner">
+        <p>OpenMic Karaoke</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 banner top-right-banner">
+        <p>Add your song <img src="/static/qrcode.png" width="64" height="64"></p>
+      </div>
+    </div>
+    <div class="row">
+      <div id="video-container">
+        <video id="video">
+          <source src="/songs/{{ song }}.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+    <!-- Bottom banner -->
+    {% if next_song %}
+    <div class="row">
+      <div class="col-12 banner bottom-banner">
+        <h1>Up Next: {{ next_song['title'] + ' - ' + next_song['user'] }}</h1>
+      </div>
+    </div>
+    {% endif %}
+  </div>
   <script>
     const socket = io("{{ url_for('tv') }}");
     const video = document.getElementById('video');
@@ -27,28 +77,27 @@
       socket.emit('autoplay_workaround')
     );
 
-    video.addEventListener('ended',function() {
+    video.addEventListener('ended', function () {
       socket.emit('song_ended')
       location.href = "{{ url_for('tv') }}";
     });
 
-    socket.on('player_restart', function() {
+    socket.on('player_restart', function () {
       video.currentTime = 0;
     });
 
-    socket.on('player_pause', function() {
+    socket.on('player_pause', function () {
       if (!video.paused) {
-          video.pause();
-          socket.emit('player_paused')
+        video.pause();
+        socket.emit('player_paused')
       } else {
-          video.play();
-          socket.emit('player_resumed')
+        video.play();
+        socket.emit('player_resumed')
       }
     });
 
-    socket.on('player_skip', function() {
+    socket.on('player_skip', function () {
       video.currentTime = video.duration;
     });
-
   </script>
 {% endblock %}
