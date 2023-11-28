@@ -36,6 +36,7 @@ jobs:
     - name: Install PyInstaller
       run: |
         pip install pyinstaller
+        pip install pywebview[gtk]
         pip install -r requirements.txt
 
     - name: Build executable
