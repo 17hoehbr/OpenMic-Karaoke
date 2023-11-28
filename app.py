@@ -7,6 +7,7 @@ import webview
 import random
 import json
 import glob
+import keyboard
 import platform
 from time import sleep
 from yt_dlp import YoutubeDL
@@ -226,6 +227,15 @@ def autoplay_workaround():
 def song_ended():
     song_queue.pop(list(song_queue.keys())[0])
 
+
+
+def toggle_fullscreen(window):
+    window.toggle_fullscreen()
+
+def on_key_event(e):
+    if e.event_type == keyboard.KEY_DOWN and e.name == 'f12':
+        toggle_fullscreen(window)
+
         
 if __name__ == "__main__":
     thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True ))
@@ -233,6 +243,8 @@ if __name__ == "__main__":
     thread.start()
 
     window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv', fullscreen=False)
+    keyboard.hook(on_key_event)
+
     
     if platform.system() == 'Darwin':  # Mac
         webview.start()
