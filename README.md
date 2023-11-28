@@ -12,6 +12,57 @@ Stil very early in development! Contributions appreciated, particularly for the 
 - Pause/Skip/Restart
 - Queue management
 
+## Install
+
+Currently OpenMic is only distributed as the python script or as a Linux AppImage. Theoretically Pyinstaller should be able to build a working Windows or Mac build relatively easily but I do not have a Windows or Mac device to test the builds on. I will gladly accept any pull requests that add a Github action to build for other platforms / distributions but I don't plan on maintaining them manually.
+
+Running from source:
+1. Install dependencies
+
+On Linux you will need to install the pywebview dependencies. For debian based distros this should cover it:
+```
+sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-webkit2-4.1
+```
+
+For other platforms please consult the [pywebview documentation](https://pywebview.flowrl.com/guide/installation.html#dependencies).
+
+2. Clone repository
+```
+git clone https://github.com/17hoehbr/OpenMic-Karaoke.git
+```
+
+3. Enter directory
+```
+cd OpenMic-Karaoke
+```
+
+4. Setup virtual environment
+```
+python -m venv .venv
+```
+
+5. Activate virtual environment
+```
+source .venv/bin/activate
+```
+
+6. Install python requirements
+```
+pip install -r requirements.txt
+```
+
+7. Run python app
+```
+python app.py
+```
+
+Building:
+
+Follow steps 1-6, then run:
+```
+pyinstaller build.spec
+```
+
 ## Screenshots
 
 ### TV
