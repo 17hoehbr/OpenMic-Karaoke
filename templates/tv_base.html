@@ -15,6 +15,14 @@
     {% endblock %}
     <script>
         document.documentElement.style.cursor = 'none';
+
+        const socket = io("{{ url_for('tv') }}");
+
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'F11') {
+                socket.emit('toggle_fullscreen');
+            }
+        });
     </script>
 </body>
 </html>

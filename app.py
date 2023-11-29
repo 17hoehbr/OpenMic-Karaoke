@@ -226,14 +226,17 @@ def autoplay_workaround():
 def song_ended():
     song_queue.pop(list(song_queue.keys())[0])
 
-        
+@socketio.on('toggle_fullscreen', namespace='/tv')
+def toggle_fullscreen():
+    window.toggle_fullscreen()
+
 if __name__ == "__main__":
     thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True ))
     thread.daemon = True
     thread.start()
 
     window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv', fullscreen=False)
-    
+
     if platform.system() == 'Darwin':  # Mac
         webview.start()
     elif platform.system() == 'Linux':  # Linux
