@@ -66,6 +66,9 @@ def search():
                 with YoutubeDL(ydl_opts) as ydl:
                     result = ydl.extract_info(yt_search, download=False)
 
+                for r in result['entries']:
+                    r['title'] = r['title'].replace("'", "")
+
         except Exception as e:
             print(f"Error during search: {e}")
 
@@ -122,7 +125,7 @@ def serve_video(filename):
 @socketio.on('start_download', namespace='/')
 def start_download(video_id, video_title, username):
     # removes (Karaoke - Version) from title
-    video_title = re.sub(r'\s*\(.*\)', '', video_title)
+    video_title = re.sub(r'\s*\(.*\)|\'', '', video_title)
 
     num = len(song_queue.keys())
 
