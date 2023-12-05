@@ -33,11 +33,11 @@
 {% endblock %}
 
 {% block script %}
-
-socket.on('play_video', function() {
-    window.location.replace("{{ url_for('up_next') }}");
-});
-
+<script>
+    socket.on('play_video', function() {
+        window.location.replace("{{ url_for('up_next') }}");
+    });
+</script>
 {% endblock %}
 
 

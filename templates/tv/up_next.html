@@ -24,10 +24,9 @@
 {% endblock %}
 
 {% block script %}
-
-setTimeout(function () {
-    window.location.replace("{{ url_for('play_video') }}")
-}, 5000);
-
-
+<script>
+    setTimeout(function () {
+        window.location.replace("{{ url_for('play_video') }}")
+    }, 5000);
+</script>
 {% endblock %}

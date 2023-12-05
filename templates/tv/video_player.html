@@ -35,35 +35,35 @@
 {% endblock %}
 
 {% block script %}
+<script>
+  const video = document.getElementById('video');
 
-const video = document.getElementById('video');
+  // autoplay workaround
+  document.addEventListener('load',
+    socket.emit('autoplay_workaround')
+  );
 
-// autoplay workaround
-document.addEventListener('load',
-  socket.emit('autoplay_workaround')
-);
+  video.addEventListener('ended', function () {
+    socket.emit('song_ended')
+    location.href = "{{ url_for('tv') }}";
+  });
+    
+  socket.on('player_restart', function () {
+    video.currentTime = 0;
+  });
 
-video.addEventListener('ended', function () {
-  socket.emit('song_ended')
-  location.href = "{{ url_for('tv') }}";
-});
-  
-socket.on('player_restart', function () {
-  video.currentTime = 0;
-});
+  socket.on('player_pause', function () {
+    if (!video.paused) {
+      video.pause();
+      socket.emit('player_paused')
+    } else {
+      video.play();
+      socket.emit('player_resumed')
+    }
+  });
 
-socket.on('player_pause', function () {
-  if (!video.paused) {
-    video.pause();
-    socket.emit('player_paused')
-  } else {
-    video.play();
-    socket.emit('player_resumed')
-  }
-});
-
-socket.on('player_skip', function () {
-  video.currentTime = video.duration;
-});
-
+  socket.on('player_skip', function () {
+    video.currentTime = video.duration;
+  });
+</script>
 {% endblock %}
