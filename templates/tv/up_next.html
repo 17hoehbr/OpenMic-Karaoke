@@ -21,6 +21,14 @@
 </div>
 
 <script>
+    const socket = io("{{ url_for('tv') }}");
+
+    window.addEventListener('keydown', function(event) {
+        if (event.key === 'F11') {
+            console.log('F11 pressed');
+            socket.emit('toggle_fullscreen');
+        }
+    });
 
     setTimeout(function () {
         window.location.replace("{{ url_for('play_video') }}")

@@ -32,7 +32,7 @@
   </div>
 
   <script>
-    const socket = io("{{ url_for('tv') }}");
+    // const socket = io("{{ url_for('tv') }}");
     const video = document.getElementById('video');
 
     // autoplay workaround
@@ -45,6 +45,13 @@
       location.href = "{{ url_for('tv') }}";
     });
 
+    window.addEventListener('keydown', function(event) {
+        if (event.key === 'F11') {
+            console.log('F11 pressed');
+            socket.emit('toggle_fullscreen');
+        }
+    });
+      
     socket.on('player_restart', function () {
       video.currentTime = 0;
     });
