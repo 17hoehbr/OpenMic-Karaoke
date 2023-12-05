@@ -41,11 +41,11 @@ def index():
     else:
         next_song = 'Nothing is currently queued'
 
-    return render_template("mobile_index.html", active="home", now_playing=now_playing, next_song=next_song)
+    return render_template("mobile/index.html", active="home", now_playing=now_playing, next_song=next_song)
 
 @app.route("/queue")
 def queue():
-    return render_template("queue.html", active="queue", song_queue=song_queue )
+    return render_template("mobile/queue.html", active="queue", song_queue=song_queue )
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
@@ -72,11 +72,11 @@ def search():
         except Exception as e:
             print(f"Error during search: {e}")
 
-    return render_template("search.html", active="search", result=result)
+    return render_template("mobile/search.html", active="search", result=result)
 
 @app.route("/admin")
 def admin():
-    return render_template("admin.html", active="admin")
+    return render_template("mobile/admin.html", active="admin")
 
 # ---------------- TV Routes ----------------
 
@@ -93,13 +93,13 @@ def tv():
         qr = qrcode.make(f'http://{local_ip}:{port}')
         qr.save(f"{cwd}/static/qrcode.png")
 
-        return render_template("tv_index.html", local_ip=local_ip, port=port)
+        return render_template("tv/index.html", local_ip=local_ip, port=port)
 
 @app.route("/up_next")
 def up_next():
     song = song_queue[list(song_queue.keys())[0]]
 
-    return render_template("up_next.html", song=song)
+    return render_template("tv/up_next.html", song=song)
 
 @app.route('/play_video')
 def play_video():
@@ -114,7 +114,7 @@ def play_video():
     while os.path.isfile(f'{song_dir}/{song}.mp4') == False:
         sleep(1)
 
-    return render_template("video_player.html", song=song, next_song=next_song, window_width=window.width, window_height=window.height)
+    return render_template("tv/video_player.html", song=song, next_song=next_song, window_width=window.width, window_height=window.height)
 
 @app.route('/songs/<path:filename>')
 def serve_video(filename):
