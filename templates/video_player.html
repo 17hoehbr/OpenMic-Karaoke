@@ -8,12 +8,12 @@
       </div>
       <div class="col d-inline-flex justify-content-end">
         <h2>Add your song: </h2>
-        <img src="/static/qrcode.png" width="128px" height="128px">
+        <img class="ms-2" src="/static/qrcode.png" width="84px" height="84px">
       </div>
     </div>
     <div class="row pt-2">
       <div class="col d-flex justify-content-center">
-        <video id="video">
+        <video id="video" width="auto" height="{{ window_height * 0.85 }}">
           <source src="/songs/{{ song }}.mp4" type="video/mp4">
           Your browser does not support the video tag.
         </video>
@@ -21,13 +21,14 @@
     </div>
 
     <!-- Bottom banner -->
-    {% if next_song %}
+    
     <div class="row">
       <div class="col text-center text-warning pt-2">
+        {% if next_song %}
         <h1>Up Next: {{ next_song['title'] + ' - ' + next_song['user'] }}</h1>
+        {% endif %}
       </div>
     </div>
-    {% endif %}
   </div>
 
   <script>

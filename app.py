@@ -114,7 +114,7 @@ def play_video():
     while os.path.isfile(f'{song_dir}/{song}.mp4') == False:
         sleep(1)
 
-    return render_template("video_player.html", song=song, next_song=next_song)
+    return render_template("video_player.html", song=song, next_song=next_song, window_width=window.width, window_height=window.height)
 
 @app.route('/songs/<path:filename>')
 def serve_video(filename):
