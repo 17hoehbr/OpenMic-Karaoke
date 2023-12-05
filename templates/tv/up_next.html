@@ -20,20 +20,14 @@
     </div>
 </div>
 
-<script>
-    const socket = io("{{ url_for('tv') }}");
 
-    window.addEventListener('keydown', function(event) {
-        if (event.key === 'F11') {
-            console.log('F11 pressed');
-            socket.emit('toggle_fullscreen');
-        }
-    });
+{% endblock %}
 
-    setTimeout(function () {
-        window.location.replace("{{ url_for('play_video') }}")
-    }, 5000);
+{% block script %}
 
-</script>
+setTimeout(function () {
+    window.location.replace("{{ url_for('play_video') }}")
+}, 5000);
+
 
 {% endblock %}

@@ -14,7 +14,19 @@
     {% block content %}
     {% endblock %}
     <script>
+        const socket = io("{{ url_for('tv') }}");
+
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'F11') {
+                console.log('F11 pressed');
+                socket.emit('toggle_fullscreen');
+            }
+        });
+
         document.documentElement.style.cursor = 'none';
+        
+        {% block script %}
+        {% endblock %}
     </script>
 </body>
 </html>

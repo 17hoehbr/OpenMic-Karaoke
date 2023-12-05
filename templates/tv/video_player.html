@@ -31,43 +31,39 @@
     </div>
   </div>
 
-  <script>
-    // const socket = io("{{ url_for('tv') }}");
-    const video = document.getElementById('video');
 
-    // autoplay workaround
-    document.addEventListener('load',
-      socket.emit('autoplay_workaround')
-    );
+{% endblock %}
 
-    video.addEventListener('ended', function () {
-      socket.emit('song_ended')
-      location.href = "{{ url_for('tv') }}";
-    });
+{% block script %}
 
-    window.addEventListener('keydown', function(event) {
-        if (event.key === 'F11') {
-            console.log('F11 pressed');
-            socket.emit('toggle_fullscreen');
-        }
-    });
-      
-    socket.on('player_restart', function () {
-      video.currentTime = 0;
-    });
+const video = document.getElementById('video');
 
-    socket.on('player_pause', function () {
-      if (!video.paused) {
-        video.pause();
-        socket.emit('player_paused')
-      } else {
-        video.play();
-        socket.emit('player_resumed')
-      }
-    });
+// autoplay workaround
+document.addEventListener('load',
+  socket.emit('autoplay_workaround')
+);
 
-    socket.on('player_skip', function () {
-      video.currentTime = video.duration;
-    });
-  </script>
+video.addEventListener('ended', function () {
+  socket.emit('song_ended')
+  location.href = "{{ url_for('tv') }}";
+});
+  
+socket.on('player_restart', function () {
+  video.currentTime = 0;
+});
+
+socket.on('player_pause', function () {
+  if (!video.paused) {
+    video.pause();
+    socket.emit('player_paused')
+  } else {
+    video.play();
+    socket.emit('player_resumed')
+  }
+});
+
+socket.on('player_skip', function () {
+  video.currentTime = video.duration;
+});
+
 {% endblock %}
