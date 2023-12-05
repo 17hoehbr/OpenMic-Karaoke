@@ -243,7 +243,7 @@ if __name__ == "__main__":
     if platform.system() == 'Darwin':  # Mac
         webview.start()
     elif platform.system() == 'Linux':  # Linux
-        webview.start(gui='gtk', debug=True)
+        webview.start(gui='gtk')
     elif platform.system() == 'Windows':  # Windows
         webview.start()
     else:
