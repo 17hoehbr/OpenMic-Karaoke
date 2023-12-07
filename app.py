@@ -146,6 +146,8 @@ def start_download(video_id, video_title, username):
                 ydl.download(video_id)
         except Exception as e:
             print(f"Error during video download: {e}")
+    
+    socketio.emit('song_queued', {'video_title': video_title, 'username': username}, namespace='/tv')
 
 # admin controls
 @socketio.on('player_restart', namespace='/')
@@ -237,8 +239,9 @@ if __name__ == "__main__":
     thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True ))
     thread.daemon = True
     thread.start()
+    screens = webview.screens
 
-    window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv', fullscreen=False)
+    window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv', fullscreen=False, screen=screens[0])
 
     if platform.system() == 'Darwin':  # Mac
         webview.start()
