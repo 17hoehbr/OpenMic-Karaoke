@@ -26,8 +26,6 @@
       <div class="col text-center text-warning pt-2">
         {% if next_song %}
         <h1>Up Next: {{ next_song['title'] + ' - ' + next_song['user'] }}</h1>
-        {% else %}
-        <h1 id="up-next" hidden></h1>
         {% endif %}
       </div>
     </div>
@@ -39,7 +37,6 @@
 {% block script %}
 <script>
   const video = document.getElementById('video');
-  const upNext = document.getElementById('up-next');
 
   // autoplay workaround
   document.addEventListener('load',
@@ -50,12 +47,7 @@
     socket.emit('song_ended')
     location.href = "{{ url_for('tv') }}";
   });
-  
-  socket.on('song_queued', function (data) {
-    upNext.textContent = `Up Next: ${data.video_title} - ${data.username}`;
-    upNext.removeAttribute('hidden');
-  });
-  
+    
   socket.on('player_restart', function () {
     video.currentTime = 0;
   });
