@@ -1,3 +1,5 @@
 .venv/
 songs/
 static/qrcode.png
+dist/
+build/
