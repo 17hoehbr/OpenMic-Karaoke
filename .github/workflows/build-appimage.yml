@@ -23,7 +23,7 @@ jobs:
       - name: Install Pywebview Dependencies
         run: |
           sudo apt update
-          sudo apt install python3-webview
+          sudo apt install python3-webview libgirepository1.0-dev
           
       - name: Checkout Fork Repository
         uses: actions/checkout@v4
