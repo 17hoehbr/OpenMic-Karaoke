@@ -31,13 +31,13 @@ jobs:
         uses: JackMcKew/pyinstaller-action-linux@0.1.4
         with:
           path: .
-
-      - name: Build AppImage
-        uses: AppImageCrafters/build-appimage@master
-        with:
-          recipe: "./AppImageBuilder.yml"
-        env:
-          UPDATE_INFO: gh-releases-zsync|AppImageCrafters|openmic|latest|*x86_64.AppImage.zsync
+          
+      # - name: Build AppImage
+      #   uses: AppImageCrafters/build-appimage@master
+      #   with:
+      #     recipe: "./AppImageBuilder.yml"
+      #   env:
+      #     UPDATE_INFO: gh-releases-zsync|AppImageCrafters|openmic|latest|*x86_64.AppImage.zsync
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
