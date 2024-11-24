@@ -28,10 +28,15 @@ jobs:
       - name: Checkout Fork Repository
         uses: actions/checkout@v4
 
-      - name: PyInstaller Linux
-        uses: JackMcKew/pyinstaller-action-linux@0.1.4
+      - name: Run Pyinstaller
+        uses: sayyid5416/pyinstaller@v1
         with:
-          path: .
+          python_ver: '3.8'
+          pyinstaller_ver: '==5.13.2'
+          spec: 'src/build.spec'
+          requirements: 'src/requirements.txt'
+          upload_exe_with_name: 'OpenMic'
+          options: --onefile, --name "OpenMic", --windowed, 
           
       # - name: Build AppImage
       #   uses: AppImageCrafters/build-appimage@master
@@ -46,4 +51,4 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4.4.3
         with:
-          name: ./OpenMic
+          name: src/OpenMic
