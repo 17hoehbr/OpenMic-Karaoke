@@ -1,7 +1,9 @@
 name: Build AppImage
 
 on:
-  push:
+  release:
+    release:
+      types: [published]
     branches:
       - main
     paths:
@@ -12,6 +14,7 @@ on:
       - 'templates/**'
       - 'static/**'
       - '.github/workflows/build-appimage.yml'
+  workflow_dispatch:
 
 jobs:
   build:
