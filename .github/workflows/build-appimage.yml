@@ -18,54 +18,28 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
-
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Install Pywebview Dependencies
+        run: |
+          sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-webkit2-4.1
+          
+      - name: Checkout Fork Repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: 3.12
+      - name: PyInstaller Linux
+        uses: JackMcKew/pyinstaller-action-linux@0.1.4
+        with:
+          path: .
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libglib2.0-0 libgtk-3-0 libwebkit2gtk-4.0-dev libfuse2 appstream libgirepository1.0-dev python3-gi python3-gi-cairo gobject-introspection gir1.2-gtk-3.0 gir1.2-webkit2-4.0
+      - name: Build AppImage
+        uses: AppImageCrafters/build-appimage@master
+        with:
+          recipe: "./AppImageBuilder.yml"
+        env:
+          UPDATE_INFO: gh-releases-zsync|AppImageCrafters|openmic|latest|*x86_64.AppImage.zsync
 
-    - name: Install build tools
-      run: sudo apt-get install -y build-essential
-
-    - name: Install PyInstaller
-      run: |
-        pip install pyinstaller
-        pip install pywebview[gtk]
-        pip install -r requirements.txt
-
-    - name: Build executable
-      run: pyinstaller build.spec  # Replace "your_script.py" with the entry point of your Python application
-
-    - name: Create AppDir
-      run: |
-        mkdir -p AppDir
-        cp dist/OpenMic AppDir/
-        cp OpenMic.desktop AppDir/
-        cp static/icons/logo.png AppDir/openmic.png
-
-    - name: Install appimage-builder
-      run: |
-        git clone https://github.com/AppImageCrafters/appimage-builder
-        cd appimage-builder
-        sudo ./ci/install-build-deps.sh
-
-    - name: Create AppImage
-      run: |
-        cd ..
-        appimage-builder --recipe AppDir/OpenMic.desktop.yml
-
-    - name: Upload AppImage as artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: OpenMic
-        path: out/OpenMic-x86_64.AppImage
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: AppImage
