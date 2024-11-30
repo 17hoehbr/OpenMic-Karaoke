@@ -1,14 +1,10 @@
-import socket
-import qrcode
 import os
 import re
 import threading
-import webview
 import random
 import json
 import glob
-import platform
-from time import sleep
+import sqlite3
 from yt_dlp import YoutubeDL
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from flask_socketio import SocketIO
@@ -18,7 +14,18 @@ socketio = SocketIO(app, async_mode='threading')
 
 app.secret_key = os.urandom(12).hex()
 
-song_queue = {}
+conn = sqlite3.connect('karaoke.db')
+cursor = conn.cursor()
+
+cursor.execute('''DROP TABLE IF EXISTS song_queue''')
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS song_queue (
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               order INTEGER,
+               video_id INTEGER,
+               video_title,
+               user
+);''')
 
 port = 8080
 cwd = os.path.dirname(__file__)
@@ -27,7 +34,7 @@ song_dir = f"{cwd}/songs"
 if not os.path.isdir(song_dir):
     os.mkdir(song_dir)
 
-# ---------------- Mobile Routes ----------------
+# Mobile Routes
 
 @app.route("/")
 def index():
@@ -78,60 +85,18 @@ def search():
 def admin():
     return render_template("mobile/admin.html", active="admin")
 
-# ---------------- TV Routes ----------------
-
-@app.route("/tv")
-def tv():
-    if song_queue:
-        return redirect(url_for('up_next'))
-    else:
-        # get local ip address
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("10.0.0.0", 0))
-
-        local_ip = s.getsockname()[0]
-        qr = qrcode.make(f'http://{local_ip}:{port}')
-        qr.save(f"{cwd}/static/qrcode.png")
-
-        return render_template("tv/index.html", local_ip=local_ip, port=port)
-
-@app.route("/up_next")
-def up_next():
-    song = song_queue[list(song_queue.keys())[0]]
-
-    return render_template("tv/up_next.html", song=song)
-
-@app.route('/play_video')
-def play_video():
-    song = song_queue[list(song_queue.keys())[0]]["id"]
-
-    if len(list(song_queue.keys())) > 1:
-        next_song = song_queue[list(song_queue.keys())[1]]
-    else:
-        next_song = ''
-
-    # waits until song is available before playing
-    while os.path.isfile(f'{song_dir}/{song}.mp4') == False:
-        sleep(1)
-
-    return render_template("tv/video_player.html", song=song, next_song=next_song, window_width=window.width, window_height=window.height)
-
-@app.route('/songs/<path:filename>')
-def serve_video(filename):
-    return send_from_directory(f'{song_dir}', filename)
-
-# ---------------- Mobile Web Socket Listeners ----------------
+# Mobile Web Socket Listeners
 
 @socketio.on('start_download', namespace='/')
 def start_download(video_id, video_title, username):
     # removes (Karaoke - Version) from title
     video_title = re.sub(r'\s*\(.*\)|\'', '', video_title)
 
-    num = len(song_queue.keys())
+    cursor.execute("INSERT INTO song_queue (video_id, video_title, user) VALUES(?, ?, ?)" (video_id, video_title, username))
+    
+    cursor.execute("UPDATE song_queue SET order = id WHERE video_id = ?" (video_id))
 
-    song_queue.update({num: { "id": video_id, "title": video_title, 'user': username }})
-
-    if num == 0:
+    if song_queue:
         socketio.emit('play_video', namespace='/tv')
 
     if not os.path.isfile(f'{song_dir}/{video_id}.mp4'):
@@ -166,20 +131,20 @@ def move_up(data):
     pos1 = int(data)
     pos2 = pos1 - 1
 
-    song_queue[pos1], song_queue[pos2] = song_queue[pos2], song_queue[pos1]
-
+    cursor.execute("UPDATE song_queue SET order = ? WHERE order = ?" (pos1, pos2))
+    cursor.execute("UPDATE song_queue SET order = ? WHERE order = ?" (pos2, pos1))
 
 @socketio.on('move_down', namespace='/')
 def move_down(data):
     pos1 = int(data)
     pos2 = pos1 + 1
 
-    song_queue[pos1], song_queue[pos2] = song_queue[pos2], song_queue[pos1]
+    cursor.execute("UPDATE song_queue SET order = ? WHERE order = ?" (pos1, pos2))
+    cursor.execute("UPDATE song_queue SET order = ? WHERE order = ?" (pos2, pos1))
 
 @socketio.on('del_song', namespace='/')
 def del_song(id):
-    song_queue.pop(int(id))
-
+    cursor.execute("DELETE FROM song_queue WHERE (id = ?)" (id))
 
 # only queues songs that are already downloaded
 @socketio.on('queue_random', namespace='/')
@@ -197,47 +162,18 @@ def queue_random(username):
             with open(f'{song}.info.json') as json_data:
                 data = json.load(json_data)
 
-            num = len(song_queue.keys())
+            cursor.execute("INSERT INTO song_queue (video_id, video_title, user) VALUES(?, ?, ?)" (data['id'], data['title'], username))
+            cursor.execute("UPDATE song_queue SET order = id WHERE video_id = ?" (data['id']))
 
-            song_queue.update({num: { "id": data['id'], "title": data['title'], 'user': username }})
-
-            if num == 0:
+            if not song_queue:
                 socketio.emit('play_video', namespace='/tv')
-    
 
-# ---------------- TV Web Socket Listeners ----------------
+def song_queue():
+    cursor.execute('''SELECT * FROM song_queue''') 
 
-# for pause icon in admin portal
-@socketio.on('player_paused', namespace='/tv')
-def player_paused():
-    socketio.emit('player_paused', namespace='/')
-
-@socketio.on('player_resumed', namespace='/tv')
-def player_paused():
-    socketio.emit('player_resumed', namespace='/')
-
-@socketio.on('autoplay_workaround', namespace='/tv')
-def autoplay_workaround():
-    window.evaluate_js(
-        r"""
-        const video = document.getElementById('video');
-        video.play();
-        """
-    )
-
-@socketio.on('song_ended', namespace='/tv')
-def song_ended():
-    song_queue.pop(list(song_queue.keys())[0])
-
-@socketio.on('toggle_fullscreen', namespace='/tv')
-def toggle_fullscreen():
-    window.toggle_fullscreen()
+    return cursor.fetchall()
 
 if __name__ == "__main__":
-    thread = threading.Thread(target=lambda: socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True ))
-    thread.daemon = True
-    thread.start()
-
-    window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv', fullscreen=False)
-
-    webview.start(gui='qt')
+    socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
+    conn.commit()
+    conn.close()
