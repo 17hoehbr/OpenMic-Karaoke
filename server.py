@@ -75,7 +75,7 @@ def admin():
 
 # Mobile Web Socket Listeners
 
-@socketio.on('start_download', namespace='/')
+@socketio.on('start_download')
 def start_download(video_id, video_title, username):
     # removes (Karaoke - Version) from title
     video_title = re.sub(r'\s*\(.*\)|\'', '', video_title)
@@ -83,7 +83,7 @@ def start_download(video_id, video_title, username):
     song_queue.append({'id': video_id, 'title': video_title, 'user': username})
 
     if len(song_queue) == 1:
-        socketio.emit('play_video', namespace='/tv')
+        socketio.emit('play_video')
 
     if not os.path.isfile(f'{song_dir}/{video_id}.mp4'):
         ydl_opts = {
@@ -99,39 +99,39 @@ def start_download(video_id, video_title, username):
             print(f"Error during video download: {e}")
 
 # admin controls
-@socketio.on('player_restart', namespace='/')
+@socketio.on('player_restart')
 def player_restart():
-    socketio.emit('player_restart', namespace='/tv')
+    socketio.emit('player_restart')
 
-@socketio.on('player_pause', namespace='/')
+@socketio.on('player_pause')
 def player_pause():
-    socketio.emit('player_pause', namespace='/tv')
+    socketio.emit('player_pause')
 
-@socketio.on('player_skip', namespace='/')
+@socketio.on('player_skip')
 def player_skip():
-    socketio.emit('player_skip', namespace='/tv')
+    socketio.emit('player_skip')
 
 # queue controls
-@socketio.on('move_up', namespace='/')
+@socketio.on('move_up')
 def move_up(data):
     pos1 = int(data)
     pos2 = pos1 - 1
 
     song_queue[pos1], song_queue[pos2] = song_queue[pos2], song_queue[pos1]
 
-@socketio.on('move_down', namespace='/')
+@socketio.on('move_down')
 def move_down(data):
     pos1 = int(data)
     pos2 = pos1 + 1
 
     song_queue[pos1], song_queue[pos2] = song_queue[pos2], song_queue[pos1]
 
-@socketio.on('del_song', namespace='/')
+@socketio.on('del_song')
 def del_song(data):
     song_queue.pop(data)
 
 # only queues songs that are already downloaded
-@socketio.on('queue_random', namespace='/')
+@socketio.on('queue_random')
 def queue_random(username):
     songs = glob.glob(f'{song_dir}/*.mp4')
     
@@ -148,8 +148,8 @@ def queue_random(username):
 
             song_queue.append({'id': data['id'], 'title': data['title'], 'user': username})
 
-            if len(song_queue) <= 5:
-                socketio.emit('play_video', namespace='/tv')
+        if len(song_queue) <= 5:
+            socketio.emit('play_video')
 
 def main():
     socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)

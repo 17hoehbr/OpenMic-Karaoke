@@ -8,34 +8,9 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt, QObject, Signal
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget
 
-# SocketIO client to handle connection with Flask-SocketIO server
-class SocketIOClient(QObject):
-    message_received = Signal(str)
+sio = socketio.Client(logger=True)
 
-    def __init__(self, url):
-        super().__init__()
-        self.sio = socketio.Client()
-        self.sio.on('connect', self.on_connected)
-        self.sio.on('message', self.on_message_received)
-        self.sio.on('disconnect', self.on_disconnect)
-        self.sio.connect(url)
-
-    def on_connected(self):
-        print("SocketIO connected!")
-        self.sio.send("Hello from client!")
-
-    def on_message_received(self, message):
-        print(f"Message received: {message}")
-        self.message_received.emit(message)
-
-    def on_disconnect(self):
-        print("SocketIO disconnected!")
-
-    def send_message(self, message):
-        self.sio.send(message)
-
-    def close(self):
-        self.sio.disconnect()
+sio.connect(f'http://localhost:{port}')
 
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
@@ -79,10 +54,6 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-        # SocketIO client setup
-        self.socketio_client = SocketIOClient(f"http://localhost:{port}")
-        self.socketio_client.message_received.connect(self.handle_text_message_received)
-
     def generate_qr_code(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("10.0.0.0", 0))
@@ -90,21 +61,6 @@ class MainWindow(QMainWindow):
         qr = qrcode.make(f'http://{local_ip}:{port}')
         qr.save(f"./qr.jpg")
         return local_ip
-
-    def start(self):
-        # You can send a message to the server once connected
-        self.socketio_client.send_message("Hello, WebSocket server!")
-
-    def handle_text_message_received(self, message):
-        data = json.loads(message)
-        if data == 'play_video':
-            w = PlayerWindow()
-            w.show()
-
-        print(data)
-
-    def send_message(self, message):
-        self.socketio_client.send_message(message)
 
 class PlayerWindow(QWidget):
     """
@@ -119,14 +75,15 @@ class PlayerWindow(QWidget):
         layout.addWidget(self.label)
         self.setLayout(layout)
 
+@sio.event
+def message(data):
+    print('I received a message!')
+
 def main():
     app = QApplication(sys.argv)
 
     window = MainWindow()
     window.show()
-
-    # Start SocketIO connection
-    window.start()
 
     app.exec()
 
