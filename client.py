@@ -2,21 +2,45 @@ import sys
 import socket
 import qrcode
 import json
-from PySide6.QtWebSockets import QWebSocket
+import socketio
+from settings import port
 from PySide6.QtGui import QPixmap
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QObject, Signal
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget
 
-port = 8080
+# SocketIO client to handle connection with Flask-SocketIO server
+class SocketIOClient(QObject):
+    message_received = Signal(str)
+
+    def __init__(self, url):
+        super().__init__()
+        self.sio = socketio.Client()
+        self.sio.on('connect', self.on_connected)
+        self.sio.on('message', self.on_message_received)
+        self.sio.on('disconnect', self.on_disconnect)
+        self.sio.connect(url)
+
+    def on_connected(self):
+        print("SocketIO connected!")
+        self.sio.send("Hello from client!")
+
+    def on_message_received(self, message):
+        print(f"Message received: {message}")
+        self.message_received.emit(message)
+
+    def on_disconnect(self):
+        print("SocketIO disconnected!")
+
+    def send_message(self, message):
+        self.sio.send(message)
+
+    def close(self):
+        self.sio.disconnect()
 
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
-        self.websocket = QWebSocket()
-        self.websocket.textMessageReceived.connect(self.handle_text_message_received)
-        self.websocket.connected.connect(self.handle_connected)
 
         self.setWindowTitle("OpenMic Karaoke")
 
@@ -55,6 +79,10 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
+        # SocketIO client setup
+        self.socketio_client = SocketIOClient(f"http://localhost:{port}")
+        self.socketio_client.message_received.connect(self.handle_text_message_received)
+
     def generate_qr_code(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("10.0.0.0", 0))
@@ -62,13 +90,10 @@ class MainWindow(QMainWindow):
         qr = qrcode.make(f'http://{local_ip}:{port}')
         qr.save(f"./qr.jpg")
         return local_ip
-    
-    def start(self):
-        url = f"wss://localhost:{port}"
-        self.websocket.open(url)
 
-    def handle_connected(self):
-        print("Websocket connected")
+    def start(self):
+        # You can send a message to the server once connected
+        self.socketio_client.send_message("Hello, WebSocket server!")
 
     def handle_text_message_received(self, message):
         data = json.loads(message)
@@ -79,7 +104,7 @@ class MainWindow(QMainWindow):
         print(data)
 
     def send_message(self, message):
-        self.websocket.sendTextMessage(message)
+        self.socketio_client.send_message(message)
 
 class PlayerWindow(QWidget):
     """
@@ -94,10 +119,16 @@ class PlayerWindow(QWidget):
         layout.addWidget(self.label)
         self.setLayout(layout)
 
+def main():
+    app = QApplication(sys.argv)
 
-app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
 
-window = MainWindow()
-window.show()
+    # Start SocketIO connection
+    window.start()
 
-app.exec()
+    app.exec()
+
+if __name__ == "__main__":
+    main()

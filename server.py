@@ -4,7 +4,7 @@ import threading
 import random
 import json
 import glob
-import sqlite3
+from settings import port
 from yt_dlp import YoutubeDL
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from flask_socketio import SocketIO
@@ -14,20 +14,8 @@ socketio = SocketIO(app, async_mode='threading')
 
 app.secret_key = os.urandom(12).hex()
 
-conn = sqlite3.connect('karaoke.db')
-cursor = conn.cursor()
+song_queue = []
 
-cursor.execute('''DROP TABLE IF EXISTS song_queue''')
-
-cursor.execute('''CREATE TABLE IF NOT EXISTS song_queue (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               order INTEGER,
-               video_id INTEGER,
-               video_title,
-               user
-);''')
-
-port = 8080
 cwd = os.path.dirname(__file__)
 song_dir = f"{cwd}/songs"
 
@@ -38,13 +26,13 @@ if not os.path.isdir(song_dir):
 
 @app.route("/")
 def index():
-    if len(song_queue.keys()) >= 1:
-        now_playing = song_queue[list(song_queue.keys())[0]]["title"]
+    if len(song_queue) >= 1:
+        now_playing = song_queue[0]["title"]
     else:
         now_playing = 'Nothing is currently playing'
 
-    if len(song_queue.keys()) >= 2:
-        next_song = song_queue[list(song_queue.keys())[1]]["title"]
+    if len(song_queue) >= 2:
+        next_song = song_queue[1]["title"]
     else:
         next_song = 'Nothing is currently queued'
 
@@ -91,12 +79,10 @@ def admin():
 def start_download(video_id, video_title, username):
     # removes (Karaoke - Version) from title
     video_title = re.sub(r'\s*\(.*\)|\'', '', video_title)
-
-    cursor.execute("INSERT INTO song_queue (video_id, video_title, user) VALUES(?, ?, ?)" (video_id, video_title, username))
     
-    cursor.execute("UPDATE song_queue SET order = id WHERE video_id = ?" (video_id))
+    song_queue.append({'id': video_id, 'title': video_title, 'user': username})
 
-    if song_queue:
+    if len(song_queue) == 1:
         socketio.emit('play_video', namespace='/tv')
 
     if not os.path.isfile(f'{song_dir}/{video_id}.mp4'):
@@ -131,20 +117,18 @@ def move_up(data):
     pos1 = int(data)
     pos2 = pos1 - 1
 
-    cursor.execute("UPDATE song_queue SET order = ? WHERE order = ?" (pos1, pos2))
-    cursor.execute("UPDATE song_queue SET order = ? WHERE order = ?" (pos2, pos1))
+    song_queue[pos1], song_queue[pos2] = song_queue[pos2], song_queue[pos1]
 
 @socketio.on('move_down', namespace='/')
 def move_down(data):
     pos1 = int(data)
     pos2 = pos1 + 1
 
-    cursor.execute("UPDATE song_queue SET order = ? WHERE order = ?" (pos1, pos2))
-    cursor.execute("UPDATE song_queue SET order = ? WHERE order = ?" (pos2, pos1))
+    song_queue[pos1], song_queue[pos2] = song_queue[pos2], song_queue[pos1]
 
 @socketio.on('del_song', namespace='/')
-def del_song(id):
-    cursor.execute("DELETE FROM song_queue WHERE (id = ?)" (id))
+def del_song(data):
+    song_queue.pop(data)
 
 # only queues songs that are already downloaded
 @socketio.on('queue_random', namespace='/')
@@ -162,18 +146,13 @@ def queue_random(username):
             with open(f'{song}.info.json') as json_data:
                 data = json.load(json_data)
 
-            cursor.execute("INSERT INTO song_queue (video_id, video_title, user) VALUES(?, ?, ?)" (data['id'], data['title'], username))
-            cursor.execute("UPDATE song_queue SET order = id WHERE video_id = ?" (data['id']))
+            song_queue.append({'id': data['id'], 'title': data['title'], 'user': username})
 
-            if not song_queue:
+            if len(song_queue) <= 5:
                 socketio.emit('play_video', namespace='/tv')
 
-def song_queue():
-    cursor.execute('''SELECT * FROM song_queue''') 
-
-    return cursor.fetchall()
+def main():
+    socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
-    conn.commit()
-    conn.close()
+    main()
