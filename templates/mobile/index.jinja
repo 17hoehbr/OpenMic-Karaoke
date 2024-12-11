@@ -1,15 +1,14 @@
-{% extends 'mobile/base.html' %}
+{% extends 'mobile/base.jinja' %}
 
 {% block content %}
-  <div>
-    <h1>Now Playing</h1>
-    <p>{{ now_playing }}</p>
-  </div>
-  <hr>
-  <div>
-    <h1>Next Song</h1>
-    <p>{{ next_song }}</p>
-  </div>
+<div>
+  <h1>Now Playing</h1>
+  <p>{{ now_playing }}</p>
+</div>
+<hr>
+<div>
+  <h1>Next Song</h1>
+  <p>{{ next_song }}</p>
+</div>
 
 {% endblock %}
-

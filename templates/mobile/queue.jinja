@@ -1,4 +1,4 @@
-{% extends 'mobile/base.html' %}
+{% extends 'mobile/base.jinja' %}
 
 {% block head %}
 <style>
@@ -36,10 +36,10 @@
           </div>
         </td>
         <td>
-          {{ song_queue[i]["title"] }}
+          {{ i["title"] }}
         </td>
         <td>
-          {{ song_queue[i]["user"] }}
+          {{ i["user"] }}
         </td>
         <td>
           {% if loop.index > 1 %}<button type="button btn-sm" onclick="del_song('{{ song_queue.index(i) }}')"

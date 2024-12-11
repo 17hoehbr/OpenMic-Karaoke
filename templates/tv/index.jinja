@@ -1,10 +1,11 @@
-{% extends 'tv/base.html' %}
+{% extends 'tv/base.jinja' %}
 
 {% block content %}
 <div class="container text-center">
     <div class="row pt-3">
         <div class="col text-warning" id="title">
-            <h2><img id="logo" src="/static/icons/logo.png" alt="logo" width="32px" height="32px"> OpenMic Karaoke! <img id="logo" src="/static/icons/logo.png" alt="logo" width="32px" height="32px"></h2>
+            <h2><img id="logo" src="/static/icons/logo.png" alt="logo" width="32px" height="32px"> OpenMic Karaoke! <img
+                    id="logo" src="/static/icons/logo.png" alt="logo" width="32px" height="32px"></h2>
         </div>
     </div>
 
@@ -34,10 +35,8 @@
 
 {% block script %}
 <script>
-    socket.on('play_video', function() {
+    socket.on('play_video', function () {
         window.location.replace("{{ url_for('up_next') }}");
     });
 </script>
 {% endblock %}
-
-

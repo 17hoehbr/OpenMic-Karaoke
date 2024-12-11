@@ -1,4 +1,4 @@
-{% extends 'mobile/base.html' %}
+{% extends 'mobile/base.jinja' %}
 
 {% block content %}
 <div class="container-fluid my-3">
@@ -8,24 +8,27 @@
       <input type="text" class="form-control" id="search" name="search">
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
-  </form> 
+  </form>
 </div>
 
 {% if result %}
 <div class="container-fluid">
   <div class="row">
-{% for r in result['entries'] %}
+    {% for r in result['entries'] %}
     <div class="col-lg card my-3 mx-auto text-center" style="width:400px">
       <img src="{{ r['thumbnails'][0]['url'] }}" class="card-img-top" alt="video thumbnail" class="img-fluid">
       <div class="card-body">
-        <h5 class="card-title"><a href="{{ r['url'] }}" target="_blank" rel="noopener noreferrer">{{ r['title'] }}</a></h5>
-        <p class="card-text"><a href="{{ r['channel_url'] }}" target="_blank" rel="noopener noreferrer">{{ r['channel'] }}</a></p>
+        <h5 class="card-title"><a href="{{ r['url'] }}" target="_blank" rel="noopener noreferrer">{{ r['title'] }}</a>
+        </h5>
+        <p class="card-text"><a href="{{ r['channel_url'] }}" target="_blank" rel="noopener noreferrer">{{ r['channel']
+            }}</a></p>
       </div>
       <div>
-        <button type="button" name="selection" onclick="start_download('{{ r['id'] }}', '{{ r['title'] }}')" class="btn btn-primary my-1">Add to queue</button>
+        <button name="selection" onclick="start_download('{{ r['id'] }}', '{{ r['title'] }}')"
+          class="btn btn-primary my-1">Add to queue</button>
       </div>
     </div>
-{% endfor %}
+    {% endfor %}
   </div>
 </div>
 {% endif %}

@@ -45,7 +45,7 @@ def index():
 
 @app.route("/queue")
 def queue():
-    return render_template("mobile/queue.html", active="queue", song_queue=song_queue )
+    return render_template("mobile/queue.jinja", active="queue", song_queue=song_queue )
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
@@ -176,8 +176,8 @@ def move_down(data):
     song_queue[pos1], song_queue[pos2] = song_queue[pos2], song_queue[pos1]
 
 @socketio.on('del_song')
-def del_song(data):
-    song_queue.pop(data)
+def del_song(index):
+    song_queue.pop(int(index))
 
 # only queues songs that are already downloaded
 @socketio.on('queue_random', namespace='/')
@@ -225,7 +225,7 @@ def autoplay_workaround():
 
 @socketio.on('song_ended', namespace='/tv')
 def song_ended():
-    song_queue.pop(song_queue[0])
+    song_queue.pop(0)
 
 @socketio.on('toggle_fullscreen', namespace='/tv')
 def toggle_fullscreen():
@@ -238,4 +238,4 @@ if __name__ == "__main__":
 
     window = webview.create_window('OpenMic Karaoke', f'http://127.0.0.1:{port}/tv', fullscreen=False)
 
-    webview.start(gui='qt')
+    webview.start()
